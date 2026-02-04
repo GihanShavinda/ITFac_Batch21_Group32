@@ -1,0 +1,9 @@
+{
+  "plants": {
+    "sample": {
+      "name": "Rose",
+      "price": 10,
+      "quantity": 5
+    }
+  }
+}

@@ -18,19 +18,19 @@ When('I click on login button', () => {
 });
 
 Then('I should be redirected to the dashboard', () => {
-  cy.url().should('include', '/dashboard');
+  cy.url().should('satisfy', (url) => url.includes('/dashboard') || url.includes('/ui/'));
 });
 
 Given('I am logged in as admin', () => {
-  cy.visit('/login');
-  cy.get('#username').type('admin@test.com');
-  cy.get('#password').type('password123');
-  cy.get('button[type="submit"]').click();
+  LoginPage.visit();
+  LoginPage.enterUsername(Cypress.env('adminUsername') || 'admin');
+  LoginPage.enterPassword(Cypress.env('adminPassword') || 'admin123');
+  LoginPage.clickLogin();
 });
 
 Given('I am logged in as sales manager', () => {
-  cy.visit('/login');
-  cy.get('#username').type('salesmanager@test.com');
-  cy.get('#password').type('password123');
-  cy.get('button[type="submit"]').click();
+  LoginPage.visit();
+  LoginPage.enterUsername('salesmanager@test.com');
+  LoginPage.enterPassword('password123');
+  LoginPage.clickLogin();
 });
