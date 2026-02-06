@@ -1,14 +1,14 @@
-import { When, Then } from '@badeball/cypress-cucumber-preprocessor';
+import { When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
 // POST /api/plants/category/{categoryId} with Bearer token; store response for later steps
 When(
-  'I send a POST request to create a plant with name {string} price {int} quantity {int} in category {int}',
+  "I send a POST request to create a plant with name {string} price {int} quantity {int} in category {int}",
   (name, price, quantity, categoryId) => {
     const uniqueName = `${name}-${Date.now()}`;
-    cy.wrap(uniqueName).as('apiPlantName');
-    cy.get('@authToken').then((token) => {
+    cy.wrap(uniqueName).as("apiPlantName");
+    cy.get("@authToken").then((token) => {
       cy.request({
-        method: 'POST',
+        method: "POST",
         url: `/api/plants/category/${categoryId}`,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -19,22 +19,25 @@ When(
           quantity,
         },
         failOnStatusCode: false,
-      }).as('createPlantResponse');
+      }).as("createPlantResponse");
     });
-  }
+  },
 );
 
-Then('the response status should be {int}', (status) => {
-  cy.get('@createPlantResponse').its('status').should('eq', status);
-});
+// Response status is checked using the generic step from DashboardAPISteps.js
+// Then('the response status should be {int}') - removed duplicate
 
-Then('the response body should contain plant details', () => {
-  cy.get('@createPlantResponse').its('body').then((body) => {
-    expect(body).to.be.an('object');
-    // Plant details typically include id and/or name
-    expect(body).to.satisfy(
-      (b) => (b.id !== undefined && b.id !== null) || (b.name !== undefined && b.name !== null),
-      'response body should have plant id or name'
-    );
-  });
+Then("the response body should contain plant details", () => {
+  cy.get("@createPlantResponse")
+    .its("body")
+    .then((body) => {
+      expect(body).to.be.an("object");
+      // Plant details typically include id and/or name
+      expect(body).to.satisfy(
+        (b) =>
+          (b.id !== undefined && b.id !== null) ||
+          (b.name !== undefined && b.name !== null),
+        "response body should have plant id or name",
+      );
+    });
 });
