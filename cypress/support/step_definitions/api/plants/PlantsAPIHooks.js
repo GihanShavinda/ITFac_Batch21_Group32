@@ -5,15 +5,11 @@ import { Before, After } from '@badeball/cypress-cucumber-preprocessor';
 const dummyCreateResponse = { body: {}, status: 0 };
 
 /**
- * Before: ensure createPlantResponse alias exists for this scenario.
- * After: delete the created plant by ID so the database is not filled with test data.
- *
- * Uses DELETE /api/plants/{id}. If your API uses a different path (e.g. by category),
- * update the url in the After hook.
- *
- * Note: Cucumber After() does not run when the scenario fails. For cleanup even on
- * failure, use Cypress afterEach() in cypress/support/e2e.js (e.g. for @api tag).
+ * PLANTS API HOOKS – Keep database stable for Plant API tests
+ * Pattern: Before (set aliases when needed); After (DELETE or restore via API).
+ * Uses DELETE /api/plants/{id} with Bearer token. Same pattern in PlantsHooks.js for UI.
  */
+/** TC_API_PLT_ADMIN_01: Before = dummy alias; After = delete created plant. */
 Before({ tags: '@TC_API_PLT_ADMIN_01' }, function () {
   cy.wrap(dummyCreateResponse).as('createPlantResponse');
 });
@@ -65,23 +61,26 @@ After({ tags: '@TC_API_PLT_ADMIN_05' }, function () {
 /** After TC_API_PLT_USER_04 and TC_API_PLT_USER_05: delete the plant created by admin (authToken is user at end, so re-login as admin to delete). */
 function afterUserUnauthorizedPlant() {
   cy.get('@apiPlantId', { timeout: 0 }).then((id) => {
-    cy.request({
-      method: 'POST',
-      url: '/api/auth/login',
-      body: {
-        username: Cypress.env('adminUsername') || 'admin',
-        password: Cypress.env('adminPassword') || 'admin123',
-      },
-      failOnStatusCode: false,
-    }).then((loginRes) => {
-      if (loginRes.status === 200 && loginRes.body?.token) {
-        cy.request({
-          method: 'DELETE',
-          url: `/api/plants/${id}`,
-          headers: { Authorization: `Bearer ${loginRes.body.token}` },
-          failOnStatusCode: false,
-        });
-      }
+    cy.env(['adminUsername', 'adminPassword']).then((env) => {
+      const body = {
+        username: env.adminUsername || 'admin',
+        password: env.adminPassword || 'admin123',
+      };
+      cy.request({
+        method: 'POST',
+        url: '/api/auth/login',
+        body,
+        failOnStatusCode: false,
+      }).then((loginRes) => {
+        if (loginRes.status === 200 && loginRes.body?.token) {
+          cy.request({
+            method: 'DELETE',
+            url: `/api/plants/${id}`,
+            headers: { Authorization: `Bearer ${loginRes.body.token}` },
+            failOnStatusCode: false,
+          });
+        }
+      });
     });
   });
 }

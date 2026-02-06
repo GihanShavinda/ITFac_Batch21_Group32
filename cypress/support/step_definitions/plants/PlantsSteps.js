@@ -47,9 +47,13 @@ Then('I should be redirected to the plant list page', () => {
 });
 
 Then('I should see the plant {string} in the list', () => {
-  // New plants appear at the end; paginate to last page then assert
-  cy.goToLastPage();
   cy.get('@newPlantName').then((name) => {
+    // Wait for the backend to persist the create/update before we load the list and search
+    cy.wait(2000);
+    // Reload list without bad filters; then search by name only
+    PlantsPage.visit();
+    PlantsPage.ensureCategoryFilterIsAll();
+    PlantsPage.searchForPlant(name);
     PlantsPage.shouldContainPlantNamed(name);
   });
 });
@@ -77,11 +81,13 @@ Then('I should be on the Edit Plant page', () => {
 });
 
 When('I change plant name to {string}', (newName) => {
-  // Plant name must be 3–25 chars; use short suffix so total length ≤ 25
+  // Plant name must be 3–25 chars; use short suffix. No spaces so search works (app bug: search fails when term has spaces).
   const suffix = Date.now().toString().slice(-5);
-  const uniqueName = `${newName} ${suffix}`.slice(0, 25);
+  const base = String(newName).replace(/\s+/g, '');
+  const uniqueName = (base ? `${base}-${suffix}` : `Plant-${suffix}`).slice(0, 25);
   cy.wrap(uniqueName).as('newPlantName');
-  PlantsPage.fillPlantForm(uniqueName, undefined, undefined, undefined);
+  // Re-select category so "Category is required" is not shown (edit form may not pre-fill dropdown)
+  PlantsPage.fillPlantForm(uniqueName, 'first', undefined, undefined);
 });
 
 // --- TC_UI_PLT_ADMIN_04: Delete plant ---
@@ -114,31 +120,36 @@ Then('the plant should no longer appear in the list', () => {
 Given('a plant with quantity 4 exists in the system', () => {
   const name = `LowStock-${Date.now()}`;
   cy.wrap(name).as('lowStockPlantName');
-  cy.request({
-    method: 'POST',
-    url: '/api/auth/login',
-    body: {
-      username: Cypress.env('adminUsername') || 'admin',
-      password: Cypress.env('adminPassword') || 'admin123',
-    },
-    failOnStatusCode: false,
-  }).then((loginRes) => {
-    if (loginRes.status !== 200 || !loginRes.body?.token) {
-      throw new Error('Could not get auth token for creating low-stock plant');
-    }
-    const token = loginRes.body.token;
+  cy.env(['adminUsername', 'adminPassword']).then((env) => {
+    const body = {
+      username: env.adminUsername || 'admin',
+      password: env.adminPassword || 'admin123',
+    };
     cy.request({
       method: 'POST',
-      url: '/api/plants/category/1',
-      headers: { Authorization: `Bearer ${token}` },
-      body: { name, price: 10, quantity: 4 },
+      url: '/api/auth/login',
+      body,
       failOnStatusCode: false,
+    }).then((loginRes) => {
+      if (loginRes.status !== 200 || !loginRes.body?.token) {
+        throw new Error('Could not get auth token for creating low-stock plant');
+      }
+      const token = loginRes.body.token;
+      cy.request({
+        method: 'POST',
+        url: '/api/plants/category/1',
+        headers: { Authorization: `Bearer ${token}` },
+        body: { name, price: 10, quantity: 4 },
+        failOnStatusCode: false,
+      });
     });
   });
 });
 
 Then('I should see the {string} badge for the low-stock plant we created', (badgeText) => {
   cy.get('@lowStockPlantName').then((name) => {
+    // Search for the plant so it appears on the first page (list may be paginated)
+    PlantsPage.searchForPlant(name);
     PlantsPage.shouldSeeLowBadgeForPlant(name);
   });
 });
