@@ -46,3 +46,43 @@ After({ tags: '@TC_UI_PLT_ADMIN_01' }, function () {
     });
   });
 });
+
+/**
+ * After hook for "Low stock badge" scenario (@TC_UI_PLT_ADMIN_05).
+ * Deletes the plant created via API (alias @lowStockPlantName) so the DB stays clean.
+ */
+After({ tags: '@TC_UI_PLT_ADMIN_05' }, function () {
+  cy.get('@lowStockPlantName').then((name) => {
+    cy.request({
+      method: 'POST',
+      url: '/api/auth/login',
+      body: {
+        username: Cypress.env('adminUsername') || 'admin',
+        password: Cypress.env('adminPassword') || 'admin123',
+      },
+      failOnStatusCode: false,
+    }).then((loginRes) => {
+      if (loginRes.status !== 200 || !loginRes.body?.token) return;
+      const token = loginRes.body.token;
+      cy.request({
+        method: 'GET',
+        url: '/api/plants',
+        headers: { Authorization: `Bearer ${token}` },
+        failOnStatusCode: false,
+      }).then((listRes) => {
+        if (listRes.status !== 200) return;
+        const body = listRes.body;
+        const list = Array.isArray(body) ? body : body?.content ?? body?.data ?? [];
+        const plant = list.find((p) => p.name === name);
+        if (plant?.id) {
+          cy.request({
+            method: 'DELETE',
+            url: `/api/plants/${plant.id}`,
+            headers: { Authorization: `Bearer ${token}` },
+            failOnStatusCode: false,
+          });
+        }
+      });
+    });
+  });
+});
