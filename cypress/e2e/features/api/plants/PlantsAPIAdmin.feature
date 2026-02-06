@@ -1,0 +1,59 @@
+Feature: Plants API
+  Verifies plant creation and other API operations as admin.
+
+  # TC_API_PLT_ADMIN_01: Create plant API
+  # Preconditions: Admin authenticated; a sub-category exists.
+  # Expected: 201 Created with plant details in response body.
+  @api @TC_API_PLT_ADMIN_01
+  Scenario: Create plant via API as admin
+    Given I am authenticated as admin for API
+    When I send a POST request to create a plant with name "Rose" price 10 quantity 5 in category 1
+    Then the response status should be 201
+    And the response body should contain plant details
+
+  # TC_API_PLT_ADMIN_02: Update plant API
+  # Preconditions: Admin authenticated; a plant exists with known ID.
+  # Expected: 200 OK with updated plant details.
+  @api @TC_API_PLT_ADMIN_02
+  Scenario: Update plant via API as admin
+    Given I am authenticated as admin for API
+    And a plant exists for API in category 1
+    When I send a PUT request to update the plant with name "Updated Rose" price 15 quantity 8
+    Then the response status should be 200
+    And the response body should contain plant details
+    And the response body should contain name "Updated Rose" price 15 quantity 8
+
+  # TC_API_PLT_ADMIN_03: Delete plant API
+  # Preconditions: Admin authenticated; a plant exists with known ID.
+  # Expected: 204 No Content (or 200 OK); GET /api/plants/{id} then returns 404.
+  @api @TC_API_PLT_ADMIN_03
+  Scenario: Delete plant via API as admin
+    Given I am authenticated as admin for API
+    And a plant exists for API in category 1
+    When I send a DELETE request for that plant
+    Then the response status should be 204
+    And a GET request to that plant should return status 404
+
+  # TC_API_PLT_ADMIN_04: Validation error (price ≤ 0)
+  # Preconditions: Admin authenticated.
+  # Expected: 400 Bad Request with error message.
+  @api @TC_API_PLT_ADMIN_04
+  Scenario: API returns 400 when creating plant with invalid price
+    Given I am authenticated as admin for API
+    When I send a POST request to create a plant with name "Rose" price 0 quantity 5 in category 1
+    Then the response status should be 400
+    And the response body should contain the error message "Price must be greater than 0"
+
+  # TC_API_PLT_ADMIN_05: Quantity boundary (0 allowed, -1 rejected)
+  # Preconditions: Admin authenticated.
+  # Expected: quantity 0 -> 201; quantity -1 -> 400 with error.
+  @api @TC_API_PLT_ADMIN_05
+  Scenario: API allows quantity 0 and rejects negative quantity
+    Given I am authenticated as admin for API
+    When I send a POST request to create a plant with name "Boundary" price 10 quantity 0 in category 1
+    Then the response status should be 201
+    And the response body should contain plant details
+    And I store the created plant id for cleanup
+    When I send a POST request to create a plant with name "InvalidQty" price 10 quantity -1 in category 1
+    Then the response status should be 400
+    And the response body should contain the error message "Quantity cannot be negative"
