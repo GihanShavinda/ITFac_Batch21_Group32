@@ -7,7 +7,9 @@ Feature: Login Functionality
 
   @smoke
   Scenario: Successful login
-    When I enter username "admin@test.com"
+    When I enter username "admin"
     And I enter password "password123"
     And I click on login button
     Then I should be redirected to the dashboard
+
+    

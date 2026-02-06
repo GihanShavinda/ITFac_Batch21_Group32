@@ -1,12 +1,13 @@
 class LoginPage {
+    // Selectors matching your login form (name="username", name="password", submit button)
     elements = {
-      usernameInput: () => cy.get('#username'),
-      passwordInput: () => cy.get('#password'),
-      loginButton: () => cy.get('button[type="submit"]')
+      usernameInput: () => cy.get('input[name="username"]'),
+      passwordInput: () => cy.get('input[name="password"]'),
+      loginButton: () => cy.get('button[type="submit"]'),
     }
   
     visit() {
-      cy.visit('/login');
+      cy.visit('/ui/login');
     }
   
     enterUsername(username) {
