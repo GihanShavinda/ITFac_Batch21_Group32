@@ -47,10 +47,9 @@ Then('I should be redirected to the plant list page', () => {
 });
 
 Then('I should see the plant {string} in the list', () => {
-  // New plants appear at the end; paginate to last page then assert
-  cy.goToLastPage();
+  // Plant can appear on any page (sort/pagination); scan pages until found
   cy.get('@newPlantName').then((name) => {
-    PlantsPage.shouldContainPlantNamed(name);
+    cy.findPlantInPaginatedList(name);
   });
 });
 

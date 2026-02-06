@@ -3,7 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cypress run",
+    "test:all": "cypress run",
+    "test:open": "cypress open",
+    "test:api": "cypress run --spec \"cypress/e2e/features/api/**/*.feature\"",
+    "test:ui": "cypress run --spec \"cypress/e2e/features/auth/**/*.feature\" --spec \"cypress/e2e/features/plants/**/*.feature\" --spec \"cypress/e2e/features/categories/**/*.feature\" --spec \"cypress/e2e/features/sales/**/*.feature\"",
+    "test:plants": "cypress run --spec \"cypress/e2e/features/plants/**/*.feature\" --spec \"cypress/e2e/features/api/plants/**/*.feature\"",
+    "test:categories": "cypress run --spec \"cypress/e2e/features/categories/**/*.feature\" --spec \"cypress/e2e/features/api/categories/**/*.feature\"",
+    "test:sales": "cypress run --spec \"cypress/e2e/features/sales/**/*.feature\" --spec \"cypress/e2e/features/api/sales/**/*.feature\"",
+    "test:auth": "cypress run --spec \"cypress/e2e/features/auth/**/*.feature\""
   },
   "keywords": [],
   "author": "",

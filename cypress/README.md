@@ -46,8 +46,27 @@ Use these step texts in any feature file; do not duplicate the implementation.
 
 ## Running tests
 
-- All tests: `npx cypress open` or `npx cypress run`
-- API only: `npx cypress run --spec "cypress/e2e/features/api/**/*.feature"`
-- UI only: exclude API, or run by tag (e.g. `@smoke`)
-
 Ensure the app is running at `baseUrl` (see **cypress.config.js**).
+
+### Test suite (from project root)
+
+Use **npm scripts** so the whole team runs the same commands:
+
+| Command | What it runs |
+|--------|----------------|
+| `npm test` or `npm run test:all` | **All** feature files (API + UI, all modules) |
+| `npm run test:open` | Cypress interactive runner (all specs) |
+| `npm run test:api` | **API only** (auth, plants, categories, sales APIs) |
+| `npm run test:ui` | **UI only** (auth, plants, categories, sales – no API features) |
+| `npm run test:plants` | **Plants** (UI plants + API plants) |
+| `npm run test:categories` | **Categories** (UI + API) |
+| `npm run test:sales` | **Sales** (UI + API) |
+| `npm run test:auth` | **Auth** (login UI) |
+
+When new modules are added (e.g. `inventory`), add a matching script in **package.json** and document it here.
+
+### Direct Cypress commands
+
+- All: `npx cypress run` or `npx cypress open`
+- One folder: `npx cypress run --spec "cypress/e2e/features/api/plants/**/*.feature"`
+- One file: `npx cypress run --spec "cypress/e2e/features/auth/Login.feature"`
