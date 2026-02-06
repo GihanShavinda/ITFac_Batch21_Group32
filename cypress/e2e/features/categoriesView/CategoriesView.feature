@@ -55,3 +55,42 @@ Feature: Categories View Management
     And the Reset button should be visible
     And the "Add A Category" button should not be visible
     And edit and delete buttons should not be visible
+
+  @ui @user @TC_UI_CAT_USER_02
+  Scenario: TC_UI_CAT_USER_02 - Empty categories data for User
+    Given I am logged in as user
+    When I navigate to categories view page
+    Then the table should be displayed with category records
+
+  @ui @user @TC_UI_CAT_USER_03
+  Scenario: TC_UI_CAT_USER_03 - Search categories by valid search query
+    Given I am logged in as user
+    And I navigate to categories view page
+    When I enter a valid category name "Indoor" in the search field
+    And I click the Search button
+    Then the table should display only matching categories
+
+  @ui @user @TC_UI_CAT_USER_04
+  Scenario: TC_UI_CAT_USER_04 - Search categories by invalid search query
+    Given I am logged in as user
+    And I navigate to categories view page
+    When I enter an invalid category name "InvalidCategory123" in the search field
+    And I click the Search button
+    Then I should see "No category found" message
+
+  @ui @user @TC_UI_CAT_USER_05
+  Scenario: TC_UI_CAT_USER_05 - Verify Parent Category Filtering
+    Given I am logged in as user
+    And I navigate to categories view page
+    When I select a parent category from the dropdown
+    And I click the Search button
+    Then the table should display only categories under selected parent
+
+  @ui @user @TC_UI_CAT_USER_07
+  Scenario: TC_UI_CAT_USER_07 - Sort categories by ID for User
+    Given I am logged in as user
+    And I navigate to categories view page
+    When I click the ID column header
+    Then categories should be sorted by ID in ascending order
+    When I click the ID column header again
+    Then categories should be sorted by ID in descending order
