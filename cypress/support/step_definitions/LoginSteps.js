@@ -26,6 +26,19 @@ Given('I am logged in as admin', () => {
   LoginPage.enterUsername(Cypress.env('adminUsername') || 'admin');
   LoginPage.enterPassword(Cypress.env('adminPassword') || 'admin123');
   LoginPage.clickLogin();
+  
+  // Verify login was successful
+  cy.url().should('not.include', '/login', { timeout: 10000 });
+});
+
+Given('I am logged in as user', () => {
+  LoginPage.visit();
+  LoginPage.enterUsername(Cypress.env('userUsername') || 'user');
+  LoginPage.enterPassword(Cypress.env('userPassword') || 'user123');
+  LoginPage.clickLogin();
+  
+  // Wait a bit for login to complete or redirect on error
+  cy.wait(1000);
 });
 
 Given('I am logged in as sales manager', () => {

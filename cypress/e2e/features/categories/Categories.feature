@@ -154,3 +154,5 @@ Feature: Categories Management
     When I navigate to categories page
     And I attempt to delete the parent category
     Then I should see an error or cascading delete occurs
+
+
