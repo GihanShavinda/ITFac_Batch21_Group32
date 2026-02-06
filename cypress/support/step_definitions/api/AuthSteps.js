@@ -2,7 +2,7 @@ import { Given } from '@badeball/cypress-cucumber-preprocessor';
 
 // Shared API auth: use Bearer token from env or from POST /api/auth/login
 Given('I am authenticated as admin for API', () => {
-  const token = Cypress.env('adminToken');
+  const token = cy.env('adminToken');
   if (token) {
     cy.wrap(token).as('authToken');
     return;
@@ -11,8 +11,8 @@ Given('I am authenticated as admin for API', () => {
     method: 'POST',
     url: '/api/auth/login',
     body: {
-      username: Cypress.env('adminUsername') || 'admin',
-      password: Cypress.env('adminPassword') || 'admin123',
+      username: cy.env('adminUsername') || 'admin',
+      password: cy.env('adminPassword') || 'admin123',
     },
     failOnStatusCode: false,
   }).then((res) => {
@@ -29,8 +29,8 @@ Given('I am authenticated as user for API', () => {
     method: 'POST',
     url: '/api/auth/login',
     body: {
-      username: Cypress.env('userUsername') || 'testuser',
-      password: Cypress.env('userPassword') || 'test123',
+      username: cy.env('userUsername') || 'testuser',
+      password: cy.env('userPassword') || 'test123',
     },
     failOnStatusCode: false,
   }).then((res) => {

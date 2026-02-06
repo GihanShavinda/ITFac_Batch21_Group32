@@ -117,8 +117,8 @@ Given('a plant with quantity 4 exists in the system', () => {
     method: 'POST',
     url: '/api/auth/login',
     body: {
-      username: Cypress.env('adminUsername') || 'admin',
-      password: Cypress.env('adminPassword') || 'admin123',
+      username: cy.env('adminUsername') || 'admin',
+      password: cy.env('adminPassword') || 'admin123',
     },
     failOnStatusCode: false,
   }).then((loginRes) => {

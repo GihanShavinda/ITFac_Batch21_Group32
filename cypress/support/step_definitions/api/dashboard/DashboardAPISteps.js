@@ -78,8 +78,8 @@ Given("I am authenticated as user for API", () => {
       method: "POST",
       url: "/api/auth/login",
       body: {
-        username: Cypress.env("userUsername") || cred.username,
-        password: Cypress.env("userPassword") || cred.password,
+        username: cy.env("userUsername") || cred.username,
+        password: cy.env("userPassword") || cred.password,
       },
       failOnStatusCode: false,
     }).then((res) => {

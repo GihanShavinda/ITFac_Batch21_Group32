@@ -26,8 +26,8 @@ Then("I should be redirected to the dashboard", () => {
 
 Given("I am logged in as admin", () => {
   LoginPage.visit();
-  LoginPage.enterUsername(Cypress.env("adminUsername") || "admin");
-  LoginPage.enterPassword(Cypress.env("adminPassword") || "admin123");
+  LoginPage.enterUsername(cy.env("adminUsername") || "admin");
+  LoginPage.enterPassword(cy.env("adminPassword") || "admin123");
   LoginPage.clickLogin();
 });
 
@@ -39,8 +39,8 @@ Given("I am logged in as sales manager", () => {
 });
 
 Given("I am logged in as user", () => {
-  const primaryUsername = Cypress.env("userUsername") || "user";
-  const primaryPassword = Cypress.env("userPassword") || "user123";
+  const primaryUsername = cy.env("userUsername") || "user";
+  const primaryPassword = cy.env("userPassword") || "user123";
   const fallbackUsername = "testuser";
   const fallbackPassword = "test123";
 

@@ -15,8 +15,8 @@ After({ tags: '@TC_UI_PLT_ADMIN_01' }, function () {
       method: 'POST',
       url: '/api/auth/login',
       body: {
-        username: Cypress.env('adminUsername') || 'admin',
-        password: Cypress.env('adminPassword') || 'admin123',
+        username: cy.env('adminUsername') || 'admin',
+        password: cy.env('adminPassword') || 'admin123',
       },
       failOnStatusCode: false,
     }).then((loginRes) => {
@@ -57,8 +57,8 @@ After({ tags: '@TC_UI_PLT_ADMIN_05' }, function () {
       method: 'POST',
       url: '/api/auth/login',
       body: {
-        username: Cypress.env('adminUsername') || 'admin',
-        password: Cypress.env('adminPassword') || 'admin123',
+        username: cy.env('adminUsername') || 'admin',
+        password: cy.env('adminPassword') || 'admin123',
       },
       failOnStatusCode: false,
     }).then((loginRes) => {
