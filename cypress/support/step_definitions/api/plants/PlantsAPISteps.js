@@ -24,20 +24,20 @@ When(
   }
 );
 
-Then('the response status should be {int}', (status) => {
+Then('the response status should be {int}', function (status) {
   // Support both @createPlantResponse (Plants API) and @apiResponse (Sales API)
-  cy.wrap(null).then(() => {
-    if (Cypress.env('currentResponse')) {
-      cy.get('@apiResponse').its('status').should('eq', status);
-    } else {
-      cy.get('@createPlantResponse').its('status').should('eq', status);
-    }
-  }).catch(() => {
-    // Fallback: try both aliases
+  // Use "this" to access aliases safely without throwing if one doesn't exist
+  const response = this.apiResponse || this.createPlantResponse;
+  
+  if (response) {
+    expect(response.status).to.eq(status);
+  } else {
+    // If neither exists yet, try to get them via cy.get to be safe (though "this" usually works)
     cy.get('body').then(() => {
-      cy.get('@apiResponse').its('status').should('eq', status);
+       const resp = this.apiResponse || this.createPlantResponse;
+       expect(resp.status).to.eq(status);
     });
-  });
+  }
 });
 
 Then('the response body should contain plant details', () => {

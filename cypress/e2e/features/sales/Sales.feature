@@ -52,16 +52,14 @@ Feature: Sales Management UI
   @TC_UI_SALES_ADMIN_07
   Scenario: TC_UI_SALES_ADMIN_07 - Verify successful sale deletion
     Given a sale exists for a plant
-    When I click delete icon for the sale
-    And I confirm deletion
+    When I click delete icon and confirm
     Then I should see success message "Sale deleted successfully"
     And the sale should be removed from list
 
   @TC_UI_SALES_ADMIN_08
   Scenario: TC_UI_SALES_ADMIN_08 - Verify cancel deletion action
     Given a sale exists for a plant
-    When I click delete icon for the sale
-    And I cancel the deletion confirmation
+    When I click delete icon and cancel
     Then the sale should NOT be deleted from database
     And the sale should remain in the sales list
 
