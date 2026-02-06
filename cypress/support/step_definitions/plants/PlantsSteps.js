@@ -76,11 +76,13 @@ Then('I should be on the Edit Plant page', () => {
 });
 
 When('I change plant name to {string}', (newName) => {
-  // Plant name must be 3–25 chars; use short suffix so total length ≤ 25
+  // Plant name must be 3–25 chars; use short suffix. No spaces so search works (app bug: search fails when term has spaces).
   const suffix = Date.now().toString().slice(-5);
-  const uniqueName = `${newName} ${suffix}`.slice(0, 25);
+  const base = String(newName).replace(/\s+/g, '');
+  const uniqueName = (base ? `${base}-${suffix}` : `Plant-${suffix}`).slice(0, 25);
   cy.wrap(uniqueName).as('newPlantName');
-  PlantsPage.fillPlantForm(uniqueName, undefined, undefined, undefined);
+  // Re-select category so "Category is required" is not shown (edit form may not pre-fill dropdown)
+  PlantsPage.fillPlantForm(uniqueName, 'first', undefined, undefined);
 });
 
 // --- TC_UI_PLT_ADMIN_04: Delete plant ---
@@ -128,16 +130,29 @@ Given('a plant with quantity 4 exists in the system', () => {
     const token = loginRes.body.token;
     cy.request({
       method: 'POST',
-      url: '/api/plants/category/1',
-      headers: { Authorization: `Bearer ${token}` },
-      body: { name, price: 10, quantity: 4 },
+      url: '/api/auth/login',
+      body,
       failOnStatusCode: false,
+    }).then((loginRes) => {
+      if (loginRes.status !== 200 || !loginRes.body?.token) {
+        throw new Error('Could not get auth token for creating low-stock plant');
+      }
+      const token = loginRes.body.token;
+      cy.request({
+        method: 'POST',
+        url: '/api/plants/category/1',
+        headers: { Authorization: `Bearer ${token}` },
+        body: { name, price: 10, quantity: 4 },
+        failOnStatusCode: false,
+      });
     });
   });
 });
 
 Then('I should see the {string} badge for the low-stock plant we created', (badgeText) => {
   cy.get('@lowStockPlantName').then((name) => {
+    // Search for the plant so it appears on the first page (list may be paginated)
+    PlantsPage.searchForPlant(name);
     PlantsPage.shouldSeeLowBadgeForPlant(name);
   });
 });

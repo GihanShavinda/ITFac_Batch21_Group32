@@ -5,15 +5,11 @@ import { Before, After } from '@badeball/cypress-cucumber-preprocessor';
 const dummyCreateResponse = { body: {}, status: 0 };
 
 /**
- * Before: ensure createPlantResponse alias exists for this scenario.
- * After: delete the created plant by ID so the database is not filled with test data.
- *
- * Uses DELETE /api/plants/{id}. If your API uses a different path (e.g. by category),
- * update the url in the After hook.
- *
- * Note: Cucumber After() does not run when the scenario fails. For cleanup even on
- * failure, use Cypress afterEach() in cypress/support/e2e.js (e.g. for @api tag).
+ * PLANTS API HOOKS – Keep database stable for Plant API tests
+ * Pattern: Before (set aliases when needed); After (DELETE or restore via API).
+ * Uses DELETE /api/plants/{id} with Bearer token. Same pattern in PlantsHooks.js for UI.
  */
+/** TC_API_PLT_ADMIN_01: Before = dummy alias; After = delete created plant. */
 Before({ tags: '@TC_API_PLT_ADMIN_01' }, function () {
   cy.wrap(dummyCreateResponse).as('createPlantResponse');
 });

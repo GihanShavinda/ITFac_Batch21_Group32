@@ -12,13 +12,21 @@ Feature: Plants – User
 
   # TC_UI_PLT_USER_02: Search plant by name
   # Preconditions: User logged in; plants exist with searchable names.
-  # Expected: Only plants matching the search term are displayed.
+  # Expected: Search is substring match (e.g. "Rose" matches "Rose Red"). Only matching plants are displayed; at least one row when matches exist.
   @TC_UI_PLT_USER_02
   Scenario: Search plant by name
     Given I am logged in as user
     And I navigate to plants page
     When I search for plant name "Rose"
     Then only plants matching "Rose" should be displayed
+
+  # Partial search: "Gerbera O" should show plants whose name contains that substring (e.g. "Gerbera Orange"). Fails if app does exact-match only or breaks on partial terms.
+  @TC_UI_PLT_USER_02 @partial-search
+  Scenario: Partial search by name shows matching plants
+    Given I am logged in as user
+    And I navigate to plants page
+    When I search for plant name "Gerbera O"
+    Then only plants matching "Gerbera O" should be displayed
 
   # TC_UI_PLT_USER_03: Filter by category
   # Preconditions: User logged in; plants exist in different categories.

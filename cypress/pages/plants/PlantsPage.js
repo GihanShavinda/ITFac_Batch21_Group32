@@ -104,6 +104,21 @@ class PlantsPage {
   }
 
   // --- List page: search, filter, sort (user scenarios) ---
+  /** Select "All" in category filter so search by name returns all matching plants (not only no-category). */
+  ensureCategoryFilterIsAll() {
+    cy.get('body').then(($body) => {
+      const $sel = $body.find('select[name="categoryId"], select[name="category"], #categoryFilter');
+      if ($sel.length) {
+        const hasEmpty = $sel.find('option[value=""]').length > 0;
+        if (hasEmpty) {
+          this.elements.categoryFilterSelect().select('', { force: true });
+        } else {
+          this.elements.categoryFilterSelect().select(0, { force: true });
+        }
+      }
+    });
+  }
+
   searchForPlant(name) {
     this.elements.searchInput().clear().type(name);
     cy.get('body').then(($body) => {
@@ -141,12 +156,11 @@ class PlantsPage {
     });
   }
 
+  /** Asserts: at least one row is displayed, and every row's text contains the search term (substring match). */
   shouldSeeOnlyPlantsMatchingSearch(searchTerm) {
-    cy.get('body').then(($body) => {
-      if ($body.find('table tbody tr').length === 0) return;
-      cy.get('table tbody tr').each(($row) => {
-        cy.wrap($row).invoke('text').should('include', searchTerm);
-      });
+    cy.get('table tbody tr').should('have.length.greaterThan', 0);
+    cy.get('table tbody tr').each(($row) => {
+      cy.wrap($row).invoke('text').should('include', searchTerm);
     });
   }
 
