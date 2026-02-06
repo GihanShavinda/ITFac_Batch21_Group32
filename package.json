@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:sales-ui": "cypress run --spec 'cypress/e2e/features/sales/Sales.feature'",
+    "test:sales-api": "cypress run --spec 'cypress/e2e/features/api/sales/SalesAPI.feature'",
+    "test:sales-all": "cypress run --spec 'cypress/e2e/features/sales/*.feature,cypress/e2e/features/api/sales/*.feature'"
   },
   "keywords": [],
   "author": "",

@@ -1,3 +1,4 @@
+// cypress.config.js
 const { defineConfig } = require('cypress');
 const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
 const addCucumberPreprocessorPlugin = require("@badeball/cypress-cucumber-preprocessor").addCucumberPreprocessorPlugin;
@@ -22,12 +23,12 @@ module.exports = defineConfig({
       return config;
     },
   },
-   env: {
+  env: {
     adminUsername: 'admin',
     adminPassword: 'admin123',
-    // Optional: set adminToken for API tests (Bearer JWT). If unset, step will try POST /api/auth/login.
     adminToken: '',
-    userUsername: 'user',
-    userPassword: 'user123',
+    // Update to match your fixture!
+    userUsername: 'testuser',  
+    userPassword: 'test123',   
   },
 });

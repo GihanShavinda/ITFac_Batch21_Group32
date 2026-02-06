@@ -25,7 +25,19 @@ When(
 );
 
 Then('the response status should be {int}', (status) => {
-  cy.get('@createPlantResponse').its('status').should('eq', status);
+  // Support both @createPlantResponse (Plants API) and @apiResponse (Sales API)
+  cy.wrap(null).then(() => {
+    if (Cypress.env('currentResponse')) {
+      cy.get('@apiResponse').its('status').should('eq', status);
+    } else {
+      cy.get('@createPlantResponse').its('status').should('eq', status);
+    }
+  }).catch(() => {
+    // Fallback: try both aliases
+    cy.get('body').then(() => {
+      cy.get('@apiResponse').its('status').should('eq', status);
+    });
+  });
 });
 
 Then('the response body should contain plant details', () => {

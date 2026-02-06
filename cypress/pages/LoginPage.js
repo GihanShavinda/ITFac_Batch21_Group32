@@ -1,5 +1,6 @@
+// cypress/pages/LoginPage.js
 class LoginPage {
-    // Selectors matching your login form (name="username", name="password", submit button)
+    // Selectors matching login form (name="username", name="password", submit button)
     elements = {
       usernameInput: () => cy.get('input[name="username"]'),
       passwordInput: () => cy.get('input[name="password"]'),

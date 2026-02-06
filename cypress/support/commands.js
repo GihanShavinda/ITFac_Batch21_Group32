@@ -1,3 +1,4 @@
+// cypress/support/commands.js
 // Custom Commands
 Cypress.Commands.add('login', (username, password) => {
   cy.visit('/login');
