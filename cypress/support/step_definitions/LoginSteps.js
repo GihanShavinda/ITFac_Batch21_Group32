@@ -34,3 +34,10 @@ Given('I am logged in as sales manager', () => {
   LoginPage.enterPassword('password123');
   LoginPage.clickLogin();
 });
+
+Given('I am logged in as user', () => {
+  LoginPage.visit();
+  LoginPage.enterUsername(Cypress.env('userUsername') || 'testuser');
+  LoginPage.enterPassword(Cypress.env('userPassword') || 'test123');
+  LoginPage.clickLogin();
+});
