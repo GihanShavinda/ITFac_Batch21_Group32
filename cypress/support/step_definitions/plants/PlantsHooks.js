@@ -59,7 +59,10 @@ Before({ tags: '@TC_UI_PLT_ADMIN_03' }, function () {
     cy.request({
       method: 'POST',
       url: '/api/auth/login',
-      body,
+      body: {
+        username: cy.env('adminUsername') || 'admin',
+        password: cy.env('adminPassword') || 'admin123',
+      },
       failOnStatusCode: false,
     }).then((loginRes) => {
       if (loginRes.status !== 200 || !loginRes.body?.token) return;
@@ -114,14 +117,23 @@ Before({ tags: '@TC_UI_PLT_ADMIN_03' }, function () {
     });
   });
 
-  /**
-   * TC_UI_PLT_ADMIN_04: Delete plant – Before: create a plant so the scenario deletes test data.
-   * No After (the scenario deletes it).
-   */
-  Before({ tags: '@TC_UI_PLT_ADMIN_04' }, function () {
-    const name = `AAA-DeleteTest-${Date.now()}`;
-    cy.wrap(name).as('deleteTestPlantName');
-    adminLoginBody().then((body) => {
+/**
+ * After hook for "Low stock badge" scenario (@TC_UI_PLT_ADMIN_05).
+ * Deletes the plant created via API (alias @lowStockPlantName) so the DB stays clean.
+ */
+After({ tags: '@TC_UI_PLT_ADMIN_05' }, function () {
+  cy.get('@lowStockPlantName').then((name) => {
+    cy.request({
+      method: 'POST',
+      url: '/api/auth/login',
+      body: {
+        username: cy.env('adminUsername') || 'admin',
+        password: cy.env('adminPassword') || 'admin123',
+      },
+      failOnStatusCode: false,
+    }).then((loginRes) => {
+      if (loginRes.status !== 200 || !loginRes.body?.token) return;
+      const token = loginRes.body.token;
       cy.request({
         method: 'POST',
         url: '/api/auth/login',
