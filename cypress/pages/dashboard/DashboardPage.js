@@ -158,9 +158,17 @@ class DashboardPage {
           const title = ($el.attr("title") || "").toLowerCase();
           const ariaLabel = ($el.attr("aria-label") || "").toLowerCase();
           const className = ($el.attr("class") || "").toLowerCase();
+          const ariaDisabled = ($el.attr("aria-disabled") || "").toLowerCase();
+          const isDisabled =
+            $el.is(":disabled") ||
+            $el.attr("disabled") !== undefined ||
+            ariaDisabled === "true" ||
+            className.includes("disabled") ||
+            className.includes("is-disabled");
 
           return (
             $el.is(":visible") &&
+            !isDisabled &&
             (text.includes("edit") ||
               title.includes("edit") ||
               ariaLabel.includes("edit") ||
@@ -179,6 +187,13 @@ class DashboardPage {
           const ariaLabel = ($el.attr("aria-label") || "").toLowerCase();
           const className = ($el.attr("class") || "").toLowerCase();
           const onclick = ($el.attr("onclick") || "").toLowerCase();
+          const ariaDisabled = ($el.attr("aria-disabled") || "").toLowerCase();
+          const isDisabled =
+            $el.is(":disabled") ||
+            $el.attr("disabled") !== undefined ||
+            ariaDisabled === "true" ||
+            className.includes("disabled") ||
+            className.includes("is-disabled");
 
           // More strict criteria: must have explicit delete/remove indicators
           const hasDeleteText =
@@ -198,6 +213,7 @@ class DashboardPage {
 
           return (
             $el.is(":visible") &&
+            !isDisabled &&
             (hasDeleteText || hasDeleteAttribute || hasDeleteClass)
           );
         });

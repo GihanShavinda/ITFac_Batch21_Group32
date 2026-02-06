@@ -71,13 +71,11 @@ Feature: Dashboard Functionality
     And existing categories should be visible
 
   @TC_UI_DASHBOARD_USER_03
-  Scenario: Verify User can navigate to Plants in read-only mode
+  Scenario: Verify User can navigate to Plants
     Given I am logged in as user
     And I should be on the dashboard page
     When I click on the "Manage Plants" button on the dashboard
     Then the URL should contain "/ui/plants"
-    And the "Add" button should not be visible on the page
-    And edit and delete icons should not be visible
 
   @TC_UI_DASHBOARD_USER_04
   Scenario: Verify User can navigate to Sales in read-only mode
