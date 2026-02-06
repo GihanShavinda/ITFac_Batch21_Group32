@@ -12,8 +12,8 @@ Feature: Categories View API
 	@api @TC_API_CAT_ADMIN_02
 	Scenario: TC_API_CAT_ADMIN_02 - Get category by valid ID
 		Given I am authenticated as "admin" via API
-		And a valid category with ID "1" exists
-		When I send a GET request to "/api/categories/1"
+		And a valid category with ID "19" exists
+		When I send a GET request to "/api/categories/19"
 		Then the response status code should be 200
 		And the response should contain category object with correct data
 
@@ -24,14 +24,14 @@ Feature: Categories View API
 		Then the response status code should be 404
 		And the response should contain an error message
 
-	@api @TC_API_CAT_ADMIN_06
-	Scenario: TC_API_CAT_ADMIN_06 - Get category summary
+	@api @TC_API_CAT_ADMIN_04
+	Scenario: TC_API_CAT_ADMIN_04 - Get category summary
 		Given I am authenticated as "admin" via API
 		When I send a GET request to "/api/categories/summary"
 		Then the response status code should be 200
 		And the response should contain summary data
-	@api @TC_API_CAT_ADMIN_07
-	Scenario: TC_API_CAT_ADMIN_07 - Get sub categories
+	@api @TC_API_CAT_ADMIN_05
+	Scenario: TC_API_CAT_ADMIN_05 - Get sub categories
 		Given I am authenticated as "admin" via API
 		When I send a GET request to "/api/categories/sub-categories"
 		Then the response status code should be 200
@@ -47,8 +47,8 @@ Feature: Categories View API
 	@api @TC_API_CAT_USER_02
 	Scenario: TC_API_CAT_USER_02 - Get category by valid ID as User
 		Given I am authenticated as "user" via API
-		And a valid category with ID "1" exists
-		When I send a GET request to "/api/categories/1"
+		And a valid category with ID "19" exists
+		When I send a GET request to "/api/categories/19"
 		Then the response status code should be 200
 		And the response should contain category object
 	@api @TC_API_CAT_USER_03

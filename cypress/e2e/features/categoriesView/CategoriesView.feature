@@ -86,8 +86,8 @@ Feature: Categories View Management
     And I click the Search button
     Then the table should display only categories under selected parent
 
-  @ui @user @TC_UI_CAT_USER_07
-  Scenario: TC_UI_CAT_USER_07 - Sort categories by ID for User
+  @ui @user @TC_UI_CAT_USER_06
+  Scenario: TC_UI_CAT_USER_06 - Sort categories by ID for User
     Given I am logged in as user
     And I navigate to categories view page
     When I click the ID column header
