@@ -141,36 +141,37 @@ Before({ tags: '@TC_UI_PLT_ADMIN_03' }, function () {
     });
   });
 
-  /** TC_UI_PLT_ADMIN_05: Low stock badge – After: delete the plant (alias @lowStockPlantName). */
-  After({ tags: '@TC_UI_PLT_ADMIN_05' }, function () {
-    cy.get('@lowStockPlantName').then((name) => {
-      adminLoginBody().then((body) => {
-        cy.request({
-          method: 'POST',
-          url: '/api/auth/login',
-          body,
-          failOnStatusCode: false,
-        }).then((loginRes) => {
-          if (loginRes.status !== 200 || !loginRes.body?.token) return;
-          const token = loginRes.body.token;
+    /** TC_UI_PLT_ADMIN_05: Low stock badge – After: delete the plant (alias @lowStockPlantName). */
+    After({ tags: '@TC_UI_PLT_ADMIN_05' }, function () {
+      cy.get('@lowStockPlantName').then((name) => {
+        adminLoginBody().then((body) => {
           cy.request({
-            method: 'GET',
-            url: '/api/plants',
-            headers: { Authorization: `Bearer ${token}` },
+            method: 'POST',
+            url: '/api/auth/login',
+            body,
             failOnStatusCode: false,
-          }).then((listRes) => {
-            if (listRes.status !== 200) return;
-            const resBody = listRes.body;
-            const list = Array.isArray(resBody) ? resBody : resBody?.content ?? resBody?.data ?? [];
-            const plant = list.find((p) => p.name === name);
-            if (plant?.id) {
-              cy.request({
-                method: 'DELETE',
-                url: `/api/plants/${plant.id}`,
-                headers: { Authorization: `Bearer ${token}` },
-                failOnStatusCode: false,
-              });
-            }
+          }).then((loginRes) => {
+            if (loginRes.status !== 200 || !loginRes.body?.token) return;
+            const token = loginRes.body.token;
+            cy.request({
+              method: 'GET',
+              url: '/api/plants',
+              headers: { Authorization: `Bearer ${token}` },
+              failOnStatusCode: false,
+            }).then((listRes) => {
+              if (listRes.status !== 200) return;
+              const resBody = listRes.body;
+              const list = Array.isArray(resBody) ? resBody : resBody?.content ?? resBody?.data ?? [];
+              const plant = list.find((p) => p.name === name);
+              if (plant?.id) {
+                cy.request({
+                  method: 'DELETE',
+                  url: `/api/plants/${plant.id}`,
+                  headers: { Authorization: `Bearer ${token}` },
+                  failOnStatusCode: false,
+                });
+              }
+            });
           });
         });
       });
