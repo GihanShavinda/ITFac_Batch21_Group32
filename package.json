@@ -9,6 +9,11 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "cypress-cucumber-preprocessor": {
+    "stepDefinitions": [
+      "cypress/support/step_definitions/**/*.js"
+    ]
+  },
   "devDependencies": {
     "@badeball/cypress-cucumber-preprocessor": "^24.0.0",
     "@bahmutov/cypress-esbuild-preprocessor": "^2.2.8",
