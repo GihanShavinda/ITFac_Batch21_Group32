@@ -27,7 +27,7 @@ module.exports = defineConfig({
     adminPassword: 'admin123',
      // Optional: set adminToken for API tests (Bearer JWT). If unset, step will try POST /api/auth/login.
     adminToken: '',
-    userUsername: 'user',
-    userPassword: 'user123',
+    userUsername: 'testuser',
+    userPassword: 'test123',
   },
 });

@@ -24,10 +24,6 @@ When(
   }
 );
 
-Then('the response status should be {int}', (status) => {
-  cy.get('@createPlantResponse').its('status').should('eq', status);
-});
-
 Then('the response body should contain plant details', () => {
   cy.get('@createPlantResponse').its('body').then((body) => {
     expect(body).to.be.an('object');

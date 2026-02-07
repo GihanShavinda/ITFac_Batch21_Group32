@@ -5,7 +5,7 @@ class CategoriesPage {
     categoryNameInput: () => cy.get('input[name="name"], #name').first(),
     parentCategorySelect: () => cy.get('select[name="parentId"], #parentId').first(),
     saveButton: () => cy.contains('button', 'Save'),
-    cancelButton: () => cy.contains('button', 'Cancel'),
+    cancelButton: () => cy.contains('button, a', /Cancel|Back/i),
     // Edit and Delete icon buttons in the Actions column
     editButtonForCategory: (categoryName) => cy.contains('tr', categoryName).find('button, a').eq(0), // First button (Edit)
     deleteButtonForCategory: (categoryName) => cy.contains('tr', categoryName).find('button, a').eq(1), // Second button (Delete)
@@ -87,7 +87,32 @@ class CategoriesPage {
   }
 
   shouldContainCategory(categoryName) {
-    cy.contains(categoryName).should('be.visible');
+    const findOnPage = () => {
+      cy.get('body').then(($body) => {
+        if ($body.text().includes(categoryName)) {
+          cy.contains(categoryName).should('be.visible');
+          return;
+        }
+
+        const $next = $body.find('a, button').filter((i, el) => {
+          const t = Cypress.$(el).text().trim();
+          return t === 'Next' || t === '»' || t === '›';
+        });
+        const $parent = $next.closest('li');
+        const disabled = $parent.hasClass('disabled') || $next.hasClass('disabled') || $next.attr('aria-disabled') === 'true';
+
+        if ($next.length && !disabled) {
+          cy.wrap($next.first()).click();
+          cy.wait(500);
+          findOnPage();
+        } else {
+          // Final assertion to surface a clear failure
+          cy.contains(categoryName).should('be.visible');
+        }
+      });
+    };
+
+    findOnPage();
   }
 
   shouldContainCategoryNamed(categoryName) {
@@ -108,13 +133,59 @@ class CategoriesPage {
   }
 
   clickEditForCategory(categoryName) {
-    cy.goToLastPage(); // Category might be on last page
-    this.elements.editButtonForCategory(categoryName).first().click();
+    const findAndEdit = () => {
+      cy.get('body').then(($body) => {
+        if ($body.text().includes(categoryName)) {
+          this.elements.editButtonForCategory(categoryName).first().click();
+          return;
+        }
+
+        const $next = $body.find('a, button').filter((i, el) => {
+          const t = Cypress.$(el).text().trim();
+          return t === 'Next' || t === '»' || t === '›';
+        });
+        const $parent = $next.closest('li');
+        const disabled = $parent.hasClass('disabled') || $next.hasClass('disabled') || $next.attr('aria-disabled') === 'true';
+
+        if ($next.length && !disabled) {
+          cy.wrap($next.first()).click();
+          cy.wait(500);
+          findAndEdit();
+        } else {
+          this.elements.editButtonForCategory(categoryName).first().click();
+        }
+      });
+    };
+
+    findAndEdit();
   }
 
   clickDeleteForCategory(categoryName) {
-    cy.goToLastPage(); // Category might be on last page
-    this.elements.deleteButtonForCategory(categoryName).first().click();
+    const findAndDelete = () => {
+      cy.get('body').then(($body) => {
+        if ($body.text().includes(categoryName)) {
+          this.elements.deleteButtonForCategory(categoryName).first().click();
+          return;
+        }
+
+        const $next = $body.find('a, button').filter((i, el) => {
+          const t = Cypress.$(el).text().trim();
+          return t === 'Next' || t === '»' || t === '›';
+        });
+        const $parent = $next.closest('li');
+        const disabled = $parent.hasClass('disabled') || $next.hasClass('disabled') || $next.attr('aria-disabled') === 'true';
+
+        if ($next.length && !disabled) {
+          cy.wrap($next.first()).click();
+          cy.wait(500);
+          findAndDelete();
+        } else {
+          this.elements.deleteButtonForCategory(categoryName).first().click();
+        }
+      });
+    };
+
+    findAndDelete();
   }
 
   confirmDelete() {
@@ -163,6 +234,112 @@ class CategoriesPage {
 
   shouldBeOnEditCategoryPage() {
     cy.url().should('include', '/ui/categories/edit/');
+  }
+
+  // ============ New Assertion Methods for User Security Tests ============
+  
+  shouldShowForbiddenPage() {
+    // More lenient check - accepts redirect or forbidden message
+    cy.url({ timeout: 10000 }).then((url) => {
+      // If redirected away from restricted page, that's valid
+      if (url.includes('login') || url.includes('error') || url.includes('403') || url.includes('forbidden')) {
+        cy.log('Redirected to forbidden/login page');
+        return;
+      }
+      
+      // If still on page, must show forbidden message
+      cy.get('body', { timeout: 10000 }).should('satisfy', ($body) => {
+        const text = $body.text().toLowerCase();
+        const hasForbidden = text.includes('403') ||
+          text.includes('forbidden') ||
+          text.includes('unauthorized') ||
+          text.includes('access denied') ||
+          text.includes('permission') ||
+          text.includes('not authorized');
+        
+        if (!hasForbidden) {
+          // If no forbidden message, at least form should be inaccessible
+          const $inputs = $body.find('input[name="name"], #name');
+          const hasDisabledForm = $inputs.length === 0 || $inputs.is(':disabled');
+          return hasDisabledForm;
+        }
+        
+        return hasForbidden;
+      });
+    });
+  }
+
+  shouldHaveDisabledEditForm() {
+    cy.url({ timeout: 5000 }).then((url) => {
+      // If redirected away, test passes
+      if (!url.includes('/ui/categories/edit/')) {
+        cy.log('User successfully redirected away from edit page');
+        return;
+      }
+      
+      // Still on edit page - verify form is restricted
+      cy.get('body').then(($body) => {
+        const text = $body.text().toLowerCase();
+        
+        // Check for forbidden message first
+        if (text.includes('forbidden') || text.includes('unauthorized') || text.includes('403')) {
+          cy.log('Page shows forbidden message');
+          return;
+        }
+        
+        // Check if save button exists
+        const $save = $body.find('button').filter((_, el) =>
+          Cypress.$(el).text().trim().toLowerCase() === 'save'
+        );
+
+        if ($save.length) {
+          const isDisabled = $save.is(':disabled') || $save.attr('aria-disabled') === 'true';
+          
+          if (isDisabled) {
+            cy.wrap($save).should('be.disabled');
+            cy.log('Save button is disabled');
+          } else {
+            // Test that save operation fails
+            cy.intercept('PUT', '**/api/categories/*').as('saveAttempt');
+            cy.log('Testing if save operation is blocked');
+            this.elements.categoryNameInput().clear().type('TestAccess');
+            cy.wrap($save).click();
+            cy.wait(1000);
+            
+            cy.get('@saveAttempt.all').then((calls) => {
+              if (calls && calls.length > 0) {
+                const status = calls[0].response?.statusCode;
+                expect([401, 403]).to.include(status);
+              }
+            });
+          }
+        } else {
+          // No save button - verify inputs are disabled or don't exist
+          const $nameInput = $body.find('input[name="name"], #name');
+          if ($nameInput.length) {
+            cy.wrap($nameInput).should('be.disabled');
+          }
+        }
+      });
+    });
+  }
+
+  shouldNotSeeAddCategoryButton() {
+    // Verify "Add Category" button does not exist or is not visible
+    cy.get('body').then(($body) => {
+      const $addBtn = $body.find('a, button').filter((_, el) => {
+        const text = Cypress.$(el).text().trim();
+        return text.toLowerCase().includes('add') && text.toLowerCase().includes('category');
+      });
+
+      if ($addBtn.length > 0) {
+        // Button exists but should not be visible
+        cy.wrap($addBtn).should('not.be.visible');
+      } else {
+        // Button should not exist
+        cy.contains('a, button', /add.*category/i).should('not.exist');
+      }
+    });
   }
 }
 

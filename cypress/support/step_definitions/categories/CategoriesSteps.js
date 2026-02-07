@@ -12,7 +12,7 @@ Then('I should see list of categories', () => {
   cy.contains('Add A Category').should('be.visible');
 });
 
-// TST_CAT_001: Add main category with valid data
+// TC_UI_CAT_ADMIN_01: Add main category with valid data
 When('I click the Add Category button', () => {
   CategoriesPage.clickAddCategory();
 });
@@ -22,13 +22,17 @@ Then('I should be on the Add Category page', () => {
 });
 
 When('I enter category name {string}', (name) => {
-  // For boundary tests (TST-CAT-003, TST-CAT-004), use exact name
-  // For other tests, add random suffix to keep it under 10 chars
+  // For boundary tests, we need to keep exact length but make it unique
   let categoryName;
   
-  if (name === "Abc" || name === "Abcdefghij") {
-    // Exact boundary test - use the name as-is
-    categoryName = name;
+  if (name === "Abc") {
+    // Minimum length boundary test (3 chars) - make unique by appending a single digit
+    const randomDigit = Math.floor(Math.random() * 10);
+    categoryName = `Ab${randomDigit}`; // Still 3 chars, but unique
+  } else if (name === "Abcdefghij") {
+    // Maximum length boundary test (10 chars) - generate a unique 10-char name
+    const suffix = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+    categoryName = `Abcdefg${suffix}`; // 7 + 3 = 10 chars
   } else {
     // Regular tests - to keep it under 10 chars, we use name prefix + short random number
     categoryName = name.substring(0, 5) + Math.floor(Math.random() * 999);
@@ -53,14 +57,12 @@ Then('I should be redirected to the category list page', () => {
 });
 
 Then('I should see the category {string} in the list', () => {
-  // Use existing custom command to ensure we see the latest entry
-  cy.goToLastPage();
   cy.get('@newCategoryName').then((name) => {
     CategoriesPage.shouldContainCategory(name);
   });
 });
 
-// TST_CAT_002: Add sub-category with valid data
+// TC_UI_CAT_ADMIN_02: Add sub-category with valid data
 Given('at least one main category exists', () => {
   // Check if a main category exists, if not create one
   cy.request({
@@ -120,7 +122,7 @@ When('I select the first parent category', () => {
   CategoriesPage.selectParentCategory('first');
 });
 
-// TST_CAT_005: Add duplicate category name
+// TC_UI_CAT_ADMIN_05: Add duplicate category name
 Given('a category {string} already exists', (categoryName) => {
   // Create a category via API
   cy.request({
@@ -156,7 +158,7 @@ Then('I should see an error message about duplicate category', () => {
   CategoriesPage.shouldShowDuplicateError();
 });
 
-// TST_CAT_006: Convert sub-category to main category
+// TC_UI_CAT_ADMIN_06: Convert sub-category to main category
 Given('a sub-category exists for editing', () => {
   cy.request({
     method: 'POST',
@@ -234,7 +236,7 @@ Then('the category should be a main category', () => {
   });
 });
 
-// TST_CAT_007: Edit category name successfully
+// TC_UI_CAT_ADMIN_07: Edit category name successfully
 Given('a category exists for editing', () => {
   cy.request({
     method: 'POST',
@@ -245,9 +247,14 @@ Given('a category exists for editing', () => {
     },
     failOnStatusCode: false,
   }).then((loginRes) => {
+    if (!loginRes.body?.token) {
+      throw new Error(`Login failed with status ${loginRes.status}: ${JSON.stringify(loginRes.body)}`);
+    }
     const token = loginRes.body.token;
-    // Keep name under 10 chars
-    const categoryName = `Edit${Math.floor(Math.random() * 999)}`;
+    // Keep name under 10 chars - use timestamp + random for uniqueness
+    const timestamp = Date.now().toString().slice(-4);
+    const random = Math.floor(Math.random() * 100);
+    const categoryName = `E${timestamp}${String(random).padStart(2, '0')}`; // E + 4 digits + 2 digits = 7 chars, unique
     
     cy.request({
       method: 'POST',
@@ -256,11 +263,14 @@ Given('a category exists for editing', () => {
       body: { name: categoryName, parentId: null },
       failOnStatusCode: false,
     }).then((res) => {
+      if (!res.body?.id) {
+        throw new Error(`Category creation failed with status ${res.status}: ${JSON.stringify(res.body)}`);
+      }
       Cypress.env('testCategoryId', res.body.id);
       cy.wrap(categoryName).as('originalCategoryName');
+      cy.wait(1000);
     });
   });
-  cy.wait(1000);
 });
 
 When('I navigate to edit that category', () => {
@@ -283,7 +293,7 @@ When('I update category name to {string}', (newName) => {
   CategoriesPage.updateCategoryName(uniqueName);
 });
 
-// TST_CAT_008: Edit category with empty name
+// TC_UI_CAT_ADMIN_08: Edit category with empty name
 When('I clear the category name field', () => {
   CategoriesPage.clearCategoryName();
 });
@@ -292,12 +302,12 @@ Then('I should see a validation error about required name', () => {
   CategoriesPage.shouldShowRequiredError();
 });
 
-// TST_CAT_009: Edit category with name above maximum length
+// TC_UI_CAT_ADMIN_09: Edit category with name above maximum length
 Then('I should see a validation error about name length', () => {
   CategoriesPage.shouldShowLengthError();
 });
 
-// TST_CAT_010: Delete main category successfully
+// TC_UI_CAT_ADMIN_10: Delete main category successfully
 Given('a deletable main category exists', () => {
   cy.request({
     method: 'POST',
@@ -347,7 +357,7 @@ Then('the category should not appear in the list', () => {
   });
 });
 
-// TST_CAT_011: Delete sub-category successfully
+// TC_UI_CAT_ADMIN_11: Delete sub-category successfully
 Given('a deletable sub-category exists', () => {
   cy.request({
     method: 'POST',
@@ -388,7 +398,7 @@ Given('a deletable sub-category exists', () => {
   cy.wait(1000);
 });
 
-// TST_CAT_012: Delete main category with sub-categories
+// TC_UI_CAT_ADMIN_12: Delete main category with sub-categories
 Given('a main category with sub-categories exists', () => {
   cy.request({
     method: 'POST',
@@ -459,6 +469,215 @@ Then('I should see an error or cascading delete occurs', () => {
     }
   });
 });
+
+// TC_UI_CAT_ADMIN_13: Add category with empty name
+// Reuses 'I should see a validation error about required name' from TC_UI_CAT_ADMIN_08
+
+// TC_UI_CAT_ADMIN_14: Cancel add category operation
+When('I click Cancel on the category form', () => {
+  CategoriesPage.clickCancel();
+  cy.wait(1000);
+});
+
+// TC_UI_CAT_ADMIN_15: Add category with name less than 3 characters
+// Uses existing 'I should see a validation error about name length' step
+
+// TC_UI_CAT_ADMIN_16: Add category with name more than 10 characters
+// Uses existing 'I should see a validation error about name length' step
+
+// TC_UI_CAT_ADMIN_17: Convert main category to sub-category
+Given('a main category exists for conversion', () => {
+  cy.request({
+    method: 'POST',
+    url: '/api/auth/login',
+    body: {
+      username: Cypress.env('adminUsername') || 'admin',
+      password: Cypress.env('adminPassword') || 'admin123',
+    },
+    failOnStatusCode: false,
+  }).then((loginRes) => {
+    const token = loginRes.body.token;
+    const categoryName = `Main${Math.floor(Math.random() * 9999)}`;
+    
+    cy.request({
+      method: 'POST',
+      url: '/api/categories',
+      headers: { Authorization: `Bearer ${token}` },
+      body: { name: categoryName, parentId: null },
+      failOnStatusCode: false,
+    }).then((res) => {
+      Cypress.env('testCategoryId', res.body.id);
+      cy.wrap(categoryName).as('testCategoryName');
+    });
+  });
+  cy.wait(1000);
+});
+
+Given('another main category exists as parent', () => {
+  cy.request({
+    method: 'POST',
+    url: '/api/auth/login',
+    body: {
+      username: Cypress.env('adminUsername') || 'admin',
+      password: Cypress.env('adminPassword') || 'admin123',
+    },
+    failOnStatusCode: false,
+  }).then((loginRes) => {
+    const token = loginRes.body.token;
+    const parentName = `Par${Math.floor(Math.random() * 9999)}`;
+    
+    cy.request({
+      method: 'POST',
+      url: '/api/categories',
+      headers: { Authorization: `Bearer ${token}` },
+      body: { name: parentName, parentId: null },
+      failOnStatusCode: false,
+    }).then((res) => {
+      Cypress.env('testParentId', res.body.id);
+      cy.wrap(parentName).as('testParentName');
+    });
+  });
+  cy.wait(1000);
+});
+
+When('I navigate to edit the conversion category', () => {
+  const categoryId = Cypress.env('testCategoryId');
+  CategoriesPage.visitEditCategory(categoryId);
+});
+
+When('I change parent to the available parent category', () => {
+  const parentId = Cypress.env('testParentId');
+  CategoriesPage.selectParentCategory(String(parentId));
+});
+
+Then('the category should be a sub-category', () => {
+  cy.request({
+    method: 'POST',
+    url: '/api/auth/login',
+    body: {
+      username: Cypress.env('adminUsername') || 'admin',
+      password: Cypress.env('adminPassword') || 'admin123',
+    },
+  }).then((loginRes) => {
+    const token = loginRes.body.token;
+    const categoryId = Cypress.env('testCategoryId');
+    
+    cy.request({
+      method: 'GET',
+      url: `/api/categories/${categoryId}`,
+      headers: { Authorization: `Bearer ${token}` },
+      failOnStatusCode: false,
+    }).then((res) => {
+      expect(res.body.parentId).to.not.be.null;
+      expect(res.body.parentId).to.equal(Cypress.env('testParentId'));
+    });
+  });
+});
+
+// TC_UI_CAT_ADMIN_18: Edit category parent successfully
+Given('a sub-category with a parent exists', () => {
+  cy.request({
+    method: 'POST',
+    url: '/api/auth/login',
+    body: {
+      username: Cypress.env('adminUsername') || 'admin',
+      password: Cypress.env('adminPassword') || 'admin123',
+    },
+    failOnStatusCode: false,
+  }).then((loginRes) => {
+    const token = loginRes.body.token;
+    
+    // Create first parent
+    cy.request({
+      method: 'POST',
+      url: '/api/categories',
+      headers: { Authorization: `Bearer ${token}` },
+      body: { name: `Par${Math.floor(Math.random() * 999)}`, parentId: null },
+      failOnStatusCode: false,
+    }).then((parentRes) => {
+      const parentId = parentRes.body.id;
+      Cypress.env('testOriginalParentId', parentId);
+      
+      // Create sub-category under first parent
+      const subName = `Sub${Math.floor(Math.random() * 9999)}`;
+      cy.request({
+        method: 'POST',
+        url: '/api/categories',
+        headers: { Authorization: `Bearer ${token}` },
+        body: { name: subName, parentId: parentId },
+        failOnStatusCode: false,
+      }).then((subRes) => {
+        Cypress.env('testCategoryId', subRes.body.id);
+        cy.wrap(subName).as('testCategoryName');
+      });
+    });
+  });
+  cy.wait(1000);
+});
+
+Given('another main category exists as alternate parent', () => {
+  cy.request({
+    method: 'POST',
+    url: '/api/auth/login',
+    body: {
+      username: Cypress.env('adminUsername') || 'admin',
+      password: Cypress.env('adminPassword') || 'admin123',
+    },
+    failOnStatusCode: false,
+  }).then((loginRes) => {
+    const token = loginRes.body.token;
+    const altParentName = `Alt${Math.floor(Math.random() * 9999)}`;
+    
+    cy.request({
+      method: 'POST',
+      url: '/api/categories',
+      headers: { Authorization: `Bearer ${token}` },
+      body: { name: altParentName, parentId: null },
+      failOnStatusCode: false,
+    }).then((res) => {
+      Cypress.env('testAltParentId', res.body.id);
+      cy.wrap(altParentName).as('testAltParentName');
+    });
+  });
+  cy.wait(1000);
+});
+
+When('I navigate to edit the sub-category', () => {
+  const categoryId = Cypress.env('testCategoryId');
+  CategoriesPage.visitEditCategory(categoryId);
+});
+
+When('I change parent to the alternate parent category', () => {
+  const altParentId = Cypress.env('testAltParentId');
+  CategoriesPage.selectParentCategory(String(altParentId));
+});
+
+Then('the category should have the new parent', () => {
+  cy.request({
+    method: 'POST',
+    url: '/api/auth/login',
+    body: {
+      username: Cypress.env('adminUsername') || 'admin',
+      password: Cypress.env('adminPassword') || 'admin123',
+    },
+  }).then((loginRes) => {
+    const token = loginRes.body.token;
+    const categoryId = Cypress.env('testCategoryId');
+    
+    cy.request({
+      method: 'GET',
+      url: `/api/categories/${categoryId}`,
+      headers: { Authorization: `Bearer ${token}` },
+      failOnStatusCode: false,
+    }).then((res) => {
+      expect(res.body.parentId).to.equal(Cypress.env('testAltParentId'));
+    });
+  });
+});
+
+// TC_UI_CAT_ADMIN_19: Edit category name below minimum length
+// Uses existing steps: 'a category exists for editing', 'I navigate to edit that category',
+// 'I update category name to', and 'I should see a validation error about name length'
 
 
 

@@ -1,14 +1,14 @@
 import { After } from '@badeball/cypress-cucumber-preprocessor';
 
 /**
- * After hook for UI scenario "Add main category with valid data" (@TST_CAT_001).
+ * After hook for UI scenario "Add main category with valid data" (@TC_UI_CAT_ADMIN_01).
  * The UI flow only knows the category name (@newCategoryName), not the id. We log in via API,
  * list categories, find the one matching @newCategoryName, then DELETE by id.
  *
  * Assumes: GET /api/categories returns a list (array or { content: [] } for pageable APIs).
  * If your API uses a different path or pagination, update listUrl or add a search param.
  */
-After({ tags: '@TST_CAT_001' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_01' }, function () {
   cy.get('@newCategoryName').then((name) => {
     // Get admin token (UI scenario doesn't set @authToken)
     cy.request({
@@ -48,10 +48,10 @@ After({ tags: '@TST_CAT_001' }, function () {
 });
 
 /**
- * After hook for UI scenario "Add sub-category with valid data" (@TST_CAT_002).
+ * After hook for UI scenario "Add sub-category with valid data" (@TC_UI_CAT_ADMIN_02).
  * Cleans up the created sub-category and parent category (if created by test).
  */
-After({ tags: '@TST_CAT_002' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_02' }, function () {
   cy.get('@newCategoryName').then((subCategoryName) => {
     // Get admin token
     cy.request({
@@ -110,10 +110,10 @@ After({ tags: '@TST_CAT_002' }, function () {
 });
 
 /**
- * After hook for boundary tests (@TST_CAT_003, @TST_CAT_004).
+ * After hook for boundary tests (@TC_UI_CAT_ADMIN_03, @TC_UI_CAT_ADMIN_04).
  * Cleans up the created category.
  */
-After({ tags: '@TST_CAT_003 or @TST_CAT_004' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_03 or @TC_UI_CAT_ADMIN_04' }, function () {
   cy.get('@newCategoryName').then((name) => {
     // Get admin token
     cy.request({
@@ -153,9 +153,9 @@ After({ tags: '@TST_CAT_003 or @TST_CAT_004' }, function () {
 });
 
 /**
- * After hook for TST_CAT_005: Cleanup existing category created for duplicate test
+ * After hook for TC_UI_CAT_ADMIN_05: Cleanup existing category created for duplicate test
  */
-After({ tags: '@TST_CAT_005' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_05' }, function () {
   const categoryId = Cypress.env('existingCategoryId');
   if (categoryId) {
     cy.request({
@@ -182,9 +182,9 @@ After({ tags: '@TST_CAT_005' }, function () {
 });
 
 /**
- * After hook for TST_CAT_006: Cleanup converted category and parent
+ * After hook for TC_UI_CAT_ADMIN_06: Cleanup converted category and parent
  */
-After({ tags: '@TST_CAT_006' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_06' }, function () {
   cy.request({
     method: 'POST',
     url: '/api/auth/login',
@@ -224,9 +224,9 @@ After({ tags: '@TST_CAT_006' }, function () {
 });
 
 /**
- * After hook for TST_CAT_007, TST_CAT_008, TST_CAT_009: Cleanup edited categories
+ * After hook for TC_UI_CAT_ADMIN_07, TC_UI_CAT_ADMIN_08, TC_UI_CAT_ADMIN_09: Cleanup edited categories
  */
-After({ tags: '@TST_CAT_007 or @TST_CAT_008 or @TST_CAT_009' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_07 or @TC_UI_CAT_ADMIN_08 or @TC_UI_CAT_ADMIN_09' }, function () {
   const categoryId = Cypress.env('testCategoryId');
   if (categoryId) {
     cy.request({
@@ -253,17 +253,17 @@ After({ tags: '@TST_CAT_007 or @TST_CAT_008 or @TST_CAT_009' }, function () {
 });
 
 /**
- * After hook for TST_CAT_010: Category already deleted by test, no cleanup needed
+ * After hook for TC_UI_CAT_ADMIN_10: Category already deleted by test, no cleanup needed
  */
-After({ tags: '@TST_CAT_010' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_10' }, function () {
   // Category was deleted by the test itself
   Cypress.env('testCategoryId', null);
 });
 
 /**
- * After hook for TST_CAT_011: Cleanup parent and sub-category (if not deleted)
+ * After hook for TC_UI_CAT_ADMIN_11: Cleanup parent and sub-category (if not deleted)
  */
-After({ tags: '@TST_CAT_011' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_11' }, function () {
   cy.request({
     method: 'POST',
     url: '/api/auth/login',
@@ -305,9 +305,9 @@ After({ tags: '@TST_CAT_011' }, function () {
 });
 
 /**
- * After hook for TST_CAT_012: Cleanup parent and child categories
+ * After hook for TC_UI_CAT_ADMIN_12: Cleanup parent and child categories
  */
-After({ tags: '@TST_CAT_012' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_12' }, function () {
   cy.request({
     method: 'POST',
     url: '/api/auth/login',
