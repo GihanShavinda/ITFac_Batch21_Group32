@@ -14,13 +14,13 @@ Feature: Plants Management
   # Expected: Plant added, redirect to /ui/plants, new plant appears in list.
   @smoke @TC_UI_PLT_ADMIN_01
   Scenario: Add plant with valid data
-    When I click the Add Plant button
-    Then I should be on the Add Plant page
-    When I enter plant name "Rose"
+    And I click the Add Plant button
+    And I should be on the Add Plant page
+    And I enter plant name "Rose"
     And I select the first sub-category for plant
     And I enter plant price 10
     And I enter plant quantity 5
-    And I click Save on the plant form
+    When I click Save on the plant form
     Then I should be redirected to the plant list page
     And I should see the plant "Rose" in the list
 
@@ -29,13 +29,13 @@ Feature: Plants Management
   # Expected: Validation message below Price field; plant is not added.
   @TC_UI_PLT_ADMIN_02
   Scenario: Validation errors when price is zero or negative
-    When I click the Add Plant button
-    Then I should be on the Add Plant page
-    When I enter plant name for validation "Rose"
+    And I click the Add Plant button
+    And I should be on the Add Plant page
+    And I enter plant name for validation "Rose"
     And I select the first sub-category for plant
     And I enter plant price 0
     And I enter plant quantity 5
-    And I click Save on the plant form
+    When I click Save on the plant form
     Then I should see the validation message "Price must be greater than 0" below the Price field
     And I should remain on the Add Plant page
 
@@ -44,8 +44,9 @@ Feature: Plants Management
   # Expected: Plant details updated, redirect to list, updated plant shown.
   @smoke @TC_UI_PLT_ADMIN_03
   Scenario: Edit plant
-    When I click Edit for the first plant in the list
-    Then I should be on the Edit Plant page
+    Given at least one plant exists in the system
+    And I click Edit for the first plant in the list
+    And I should be on the Edit Plant page
     When I change plant name to "Updated Rose"
     And I click Save on the plant form
     Then I should be redirected to the plant list page
@@ -56,7 +57,8 @@ Feature: Plants Management
   # Expected: Plant deleted and no longer in the list.
   @TC_UI_PLT_ADMIN_04
   Scenario: Delete plant
-    Given I remember the name of the first plant in the list
+    Given at least one plant exists in the system
+    And I remember the name of the first plant in the list
     When I click Delete for the first plant in the list
     And I confirm the deletion
     Then the plant should no longer appear in the list

@@ -44,8 +44,8 @@ After({ tags: '@TC_API_PLT_ADMIN_02' }, function () {
   });
 });
 
-/** After TC_API_PLT_ADMIN_05: delete the plant created with quantity 0. */
-After({ tags: '@TC_API_PLT_ADMIN_05' }, function () {
+/** After TC_API_PLT_ADMIN_05 (quantity 0 scenario only): delete the plant created. Negative-quantity scenario does not set @apiPlantIdForCleanup. */
+After({ tags: '@TC_API_PLT_ADMIN_05_cleanup' }, function () {
   cy.get('@apiPlantIdForCleanup', { timeout: 0 }).then((id) => {
     cy.get('@authToken').then((token) => {
       cy.request({

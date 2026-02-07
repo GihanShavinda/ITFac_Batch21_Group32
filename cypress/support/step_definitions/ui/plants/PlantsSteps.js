@@ -5,6 +5,37 @@ Given('I navigate to plants page', () => {
   PlantsPage.visit();
 });
 
+// Ensures at least one plant exists so Edit/Delete scenarios have a target (reloads list after create).
+Given('at least one plant exists in the system', () => {
+  const name = `Plant-${Date.now()}`;
+  cy.env(['adminUsername', 'adminPassword']).then((env) => {
+    const body = {
+      username: env.adminUsername || 'admin',
+      password: env.adminPassword || 'admin123',
+    };
+    cy.request({
+      method: 'POST',
+      url: '/api/auth/login',
+      body,
+      failOnStatusCode: false,
+    }).then((loginRes) => {
+      if (loginRes.status !== 200 || !loginRes.body?.token) {
+        throw new Error('Could not get auth token for creating plant');
+      }
+      const token = loginRes.body.token;
+      cy.request({
+        method: 'POST',
+        url: '/api/plants/category/1',
+        headers: { Authorization: `Bearer ${token}` },
+        body: { name, price: 10, quantity: 5 },
+        failOnStatusCode: false,
+      }).then(() => {
+        PlantsPage.visit(); // reload so the new plant appears in the list
+      });
+    });
+  });
+});
+
 Then('I should see list of plants', () => {
   cy.url().should('include', '/ui/plants');
   cy.contains('Add a Plant').should('be.visible');
