@@ -70,3 +70,4 @@ When new modules are added (e.g. `inventory`), add a matching script in **packag
 - All: `npx cypress run` or `npx cypress open`
 - One folder: `npx cypress run --spec "cypress/e2e/features/api/plants/**/*.feature"`
 - One file: `npx cypress run --spec "cypress/e2e/features/auth/Login.feature"`
+- dfdddddddd
