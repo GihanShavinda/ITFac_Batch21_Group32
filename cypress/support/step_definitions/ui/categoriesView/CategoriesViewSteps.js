@@ -1,56 +1,32 @@
-/**
- * CategoriesViewSteps.js
- * Step Definitions for Categories View Feature (Gherkin Scenarios)
- *
- * Handles all UI step definitions for Categories View testing including:
- * - Navigation and page verification
- * - Search and filter operations
- * - Sorting functionality
- * - Table element verification
- */
 
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 import CategoriesViewPage from "../../../../pages/categoriesView/CategoriesViewPage";
 import LoginPage from "../../../../pages/LoginPage";
 
-// ═══════════════════════════════════════════════════════════════════════════
-// BACKGROUND STEPS - Login and Navigation
-// ═══════════════════════════════════════════════════════════════════════════
 
-// NOTE: Login steps are defined centrally in LoginSteps.js. Do not redefine them here to avoid duplicates.
 
 When("I navigate to categories view page", () => {
-  cy.wait(500); // Allow page to stabilize after login
+  cy.wait(500);
   CategoriesViewPage.visit();
-  cy.wait(500); // Wait for categories to load
+  cy.wait(500);
 
-  // Check if navigation was successful or if there's a redirect
   cy.url().then((url) => {
     if (!url.includes("/categories")) {
-      cy.log(`⚠️ WARNING: Expected /categories but got: ${url}`);
     }
   });
 });
 
-// Alias matching feature wording: "I navigate to categories page"
-// Note: Use existing step definition 'I navigate to categories page' from categories/CategoriesSteps.js
-// This step has been removed to avoid duplication.
 
 Given("all categories are cleared", () => {
-  // Skip if table doesn't exist yet
   cy.visit("/ui/categories");
   cy.wait(1000);
 
-  // Attempt to find table rows - if none exist, this step is complete
   cy.get("body").then(($body) => {
-    // Check if empty state is already shown
     const emptyMsg = $body.text().toLowerCase();
     if (emptyMsg.includes("no categories") || emptyMsg.includes("no data")) {
-      cy.log("Categories already empty - skipping clear step");
       return;
     }
 
-    // Try to find delete buttons - if none, categories may already be empty
     const deleteButtons = $body
       .find("table tbody tr button, table tbody tr a")
       .filter(function () {
@@ -64,19 +40,11 @@ Given("all categories are cleared", () => {
       });
 
     if (deleteButtons.length === 0) {
-      cy.log("No delete buttons found - categories may already be empty");
       return;
     }
-
-    cy.log(
-      `Found ${deleteButtons.length} delete actions - attempting to clear categories`,
-    );
   });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PAGE ELEMENT VERIFICATION STEPS
-// ═══════════════════════════════════════════════════════════════════════════
 
 Then("I should see all UI elements for admin on categories view page", () => {
   CategoriesViewPage.verifyAdminUIElements();
@@ -127,7 +95,6 @@ Then('the "All Parents" dropdown should be visible', () => {
   CategoriesViewPage.verifyDropdown();
 });
 
-// Accept alternate phrasing used in feature files
 Then(
   /the\s+Search\s+sub\s*category\s+input\s+field\s+should\s+be\s+visible/i,
   () => {
@@ -166,40 +133,29 @@ Then("I should not see Edit or Delete buttons in Actions column", () => {
   CategoriesViewPage.verifyDeleteButtonNotVisible();
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// DATA VERIFICATION STEPS
-// ═══════════════════════════════════════════════════════════════════════════
 
 Given("categories exist in the system", () => {
-  // Verify that the table is not empty and categories are visible
   CategoriesViewPage.getCategoryCount().then((count) => {
     expect(count).to.be.greaterThan(0);
   });
 });
 
 Given("categories with parents exist in the system", () => {
-  // Verify that categorized data exists with parent relationships
   CategoriesViewPage.elements.tableRows().first().should("be.visible");
   CategoriesViewPage.elements
     .allParentsDropdown()
     .should("have.length.greaterThan", 1);
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// SEARCH STEPS
-// ═══════════════════════════════════════════════════════════════════════════
 
 Given("a category named {string} exists", (categoryName) => {
-  // Store category name for later use in search
   cy.wrap(categoryName).as("categoryName");
 
-  // Navigate to categories add page and create the category
   cy.visit("/ui/categories/add");
   cy.get(
     'input[name="name"], input[placeholder*="Category name"], #categoryName',
   ).type(categoryName);
   cy.contains("button", /Add|Create|Submit|Save/i).click();
-  // After creation, ensure we're on the categories list and the new category appears
   cy.wait(1000);
   cy.visit("/ui/categories");
   cy.get("table", { timeout: 10000 })
@@ -208,19 +164,16 @@ Given("a category named {string} exists", (categoryName) => {
 });
 
 When("I enter {string} in the search field", (searchTerm) => {
-  // Store the search term for assertion later
   cy.wrap(searchTerm).as("searchCategory");
   CategoriesViewPage.enterSearchQuery(searchTerm);
 });
 
 When("I enter a valid category name in the search field", () => {
-  // Type a simple test category name for search
   const searchTerm = "Test";
   cy.wrap(searchTerm).as("searchCategory");
   CategoriesViewPage.enterSearchQuery(searchTerm);
 });
 
-// Parameterized invalid-name step (accepts a string in the feature)
 When(
   "I enter an invalid category name {string} in the search field",
   (name) => {
@@ -230,14 +183,12 @@ When(
   },
 );
 
-// Backwards-compatible step without parameter
 When("I enter an invalid category name in the search field", (name) => {
   const invalidName = name || "NonExistentCategory" + Date.now();
   cy.wrap(invalidName).as("searchCategory");
   CategoriesViewPage.enterSearchQuery(invalidName);
 });
 
-// Parameterized step to enter a valid category name (keeps typing only)
 When(
   "I enter a valid category name {string} in the search field",
   (categoryName) => {
@@ -246,13 +197,11 @@ When(
   },
 );
 
-// Generic alias for clicking Search (works across feature phrasing)
 When("I click the Search button", () => {
   CategoriesViewPage.clickSearch();
 });
 
 When("I select a parent category from the dropdown", () => {
-  // Choose the first non-empty option and store its visible text
   CategoriesViewPage.elements.allParentsDropdown().then(($select) => {
     const $opts = Cypress.$($select)
       .find("option")
@@ -263,7 +212,6 @@ When("I select a parent category from the dropdown", () => {
       });
 
     if ($opts.length === 0) {
-      cy.log("No parent options available");
       cy.wrap("").as("selectedParent");
       return;
     }
@@ -280,7 +228,6 @@ When("I select a parent category from the dropdown", () => {
 Then("the table should display only categories under selected parent", () => {
   cy.get("@selectedParent").then((parentName) => {
     if (!parentName) {
-      cy.log("No parent selected; skipping parent-filter assertions");
       return;
     }
     CategoriesViewPage.verifyFilteredByParent(parentName);
@@ -298,7 +245,6 @@ Then("the table should display only matching categories", () => {
 });
 
 Then("the search result should contain {string}", (searchTerm) => {
-  // Robustly check for table presence first, then assert
   cy.get("body").then(($body) => {
     if ($body.find("table").length > 0) {
       cy.get("table", { timeout: 10000 })
@@ -324,9 +270,6 @@ Then("the table should be empty", () => {
   CategoriesViewPage.elements.tableRows().should("not.exist");
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// FILTER STEPS
-// ═══════════════════════════════════════════════════════════════════════════
 
 When('I click the "All Parents" dropdown', () => {
   CategoriesViewPage.elements.allParentsDropdown().click();
@@ -347,14 +290,10 @@ Then("the search input should be empty", () => {
 });
 
 Then("all categories should be displayed again", () => {
-  // After reset, categories should be visible (not "no data" message)
   CategoriesViewPage.elements.noDataMessage().should("not.exist");
   CategoriesViewPage.elements.tableRows().should("have.length.greaterThan", 0);
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// SORTING STEPS
-// ═══════════════════════════════════════════════════════════════════════════
 
 When("I click the ID column header", () => {
   CategoriesViewPage.sortByIdColumn();

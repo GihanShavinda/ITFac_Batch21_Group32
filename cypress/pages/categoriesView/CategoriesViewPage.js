@@ -1,11 +1,5 @@
-/**
- * CategoriesViewPage.js
- * Page Object Model for Categories View
- */
-
 class CategoriesViewPage {
   elements = {
-    // Search and Filter Elements
     searchInput: () =>
       cy.document().then((doc) => {
         const $ = Cypress.$;
@@ -37,20 +31,12 @@ class CategoriesViewPage {
       ),
     searchButton: () => cy.contains("button", /Search|Go|Submit/i),
     resetButton: () => cy.contains("button", /Reset|Clear/i),
-
-    // Add Category Button (Admin only)
     addCategoryButton: () =>
       cy.contains("a, button", /Add A Category|Add Category/i),
-
-    // Table Elements
     categoriesTable: () => cy.get('table, [role="table"]'),
     tableRows: () => cy.get("table tbody tr"),
     tableHeaderRow: () => cy.get("table thead tr"),
-
-    // Column Headers
     columnHeader: (name) => cy.get("th").contains(new RegExp(name, "i")),
-
-    // Empty State
     noDataMessage: () => cy.contains(/No categories found|No data/i),
   };
 
@@ -72,7 +58,6 @@ class CategoriesViewPage {
   }
 
   verifyResetButton() {
-    // Robustly find a reset-like control: check type=reset, data attributes, aria-labels, or visible text
     return cy.document().then((doc) => {
       const $ = Cypress.$;
       const candidates = $(
@@ -122,7 +107,6 @@ class CategoriesViewPage {
   }
 
   getColumnIndexByName(name) {
-    // returns 0-based column index for header matching name (case-insensitive)
     return cy.get("table thead tr th").then(($ths) => {
       let idx = -1;
       $ths.each((i, th) => {
@@ -138,11 +122,8 @@ class CategoriesViewPage {
 
   verifyFilteredByParent(parentName) {
     if (!parentName) {
-      cy.log("Empty parentName provided to verifyFilteredByParent");
       return;
     }
-
-    // Find the Parent column index, then assert each non-empty cell contains parentName
     this.getColumnIndexByName("Parent").then((colIndex) => {
       if (colIndex === -1) {
         throw new Error("Parent column not found in table header");
@@ -162,8 +143,6 @@ class CategoriesViewPage {
                     expect(cellText).to.contain(parentName);
                   }
                 });
-            } else {
-              cy.log(`Row has ${tdCount} columns, skipping index ${colIndex}`);
             }
           });
       });
@@ -181,7 +160,6 @@ class CategoriesViewPage {
   }
 
   clickReset() {
-    // Use robust finder to click the reset-like control
     this.verifyResetButton().then(($el) => {
       cy.wrap($el).click();
       cy.wait(500);
@@ -196,20 +174,13 @@ class CategoriesViewPage {
   verifySearchResults(searchQuery) {
     cy.get("body").then(($body) => {
       const hasTable = $body.find("table").length > 0;
-
       if (!hasTable) {
-        cy.log("No table found, checking for empty state message");
         return;
       }
-
       this.elements.tableRows().then(($rows) => {
         if ($rows.length === 0) {
-          cy.log(
-            "No table rows found after search - results may be empty or category doesn't exist",
-          );
           return;
         }
-
         let found = false;
         $rows.each((index, row) => {
           if (row.textContent.includes(searchQuery)) {
@@ -217,12 +188,6 @@ class CategoriesViewPage {
             return false;
           }
         });
-
-        if (!found) {
-          cy.log(
-            `Search term "${searchQuery}" not found in table rows. Rows may contain different data format.`,
-          );
-        }
       });
     });
   }
@@ -305,7 +270,6 @@ class CategoriesViewPage {
   }
 
   verifyEditDeleteButtonsNotVisible() {
-    // Check that edit buttons (btn-warning) don't exist in the table
     cy.get("table tbody tr").then(($rows) => {
       if ($rows.length > 0) {
         cy.get("table tbody .btn-warning").should("not.exist");

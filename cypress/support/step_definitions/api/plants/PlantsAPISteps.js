@@ -1,6 +1,5 @@
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 
-// POST /api/plants/category/{categoryId} with Bearer token; store response for later steps
 When(
   'I send a POST request to create a plant with name {string} price {int} quantity {int} in category {int}',
   (name, price, quantity, categoryId) => {
@@ -26,8 +25,6 @@ When(
     });
   }
 );
-
-// "the response status should be {int}" is defined in api/SharedAPISteps.js (uses lastApiResponse when set)
 
 Then('the response body should contain plant details', () => {
   cy.get('@lastApiResponse').its('body').then((body) => {
@@ -60,7 +57,6 @@ Given('a plant exists for API in category {int}', (categoryId) => {
 });
 
 When('I send a PUT request to update the plant with name {string} price {int} quantity {int}', (name, price, quantity) => {
-  // API requires name length 3–25; keep unique to avoid DB duplicate (name, category_id)
   const uniqueName = `Rose-${Date.now().toString().slice(-8)}`;
   cy.wrap(uniqueName).as('updatedPlantName');
   cy.get('@authToken').then((token) => {
@@ -98,7 +94,6 @@ Then('the response body should contain the updated plant name and price {int} qu
   });
 });
 
-// --- TC_API_PLT_ADMIN_03: Delete plant ---
 When('I send a DELETE request for that plant', () => {
   cy.get('@authToken').then((token) => {
     cy.get('@apiPlantId').then((id) => {
@@ -129,7 +124,6 @@ Then('a GET request to that plant should return status {int}', (status) => {
   });
 });
 
-// --- TC_API_PLT_ADMIN_04 & 05: Validation and error message ---
 Then('the response body should contain the error message {string}', (message) => {
   cy.get('@lastApiResponse').its('body').then((body) => {
     const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
@@ -143,7 +137,6 @@ Then('I store the created plant id for cleanup', () => {
   });
 });
 
-// --- Plants API User (TC_API_PLT_USER_01–05) ---
 When('I send a GET request to list plants', () => {
   cy.get('@authToken').then((token) => {
     cy.request({

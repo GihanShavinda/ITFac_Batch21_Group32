@@ -33,32 +33,18 @@ class DashboardPage {
   }
 
   clickManageCategoriesButton() {
-    cy.wait(1500); // Wait for dashboard to fully load
-
-    // Try multiple strategies in order of specificity
+    cy.wait(1500);
     cy.get("body").then(($body) => {
       const bodyHtml = $body.html();
-
-      // Strategy 1: Look for links with /categories in href
       if ($body.find('a[href*="/categories"]').length > 0) {
-        cy.log("Found Categories via href");
         cy.get('a[href*="/categories"]').first().click({ force: true });
-      }
-      // Strategy 2: Look for "Manage Categories" text
-      else if (bodyHtml.includes("Manage Categories")) {
-        cy.log('Found "Manage Categories" text');
+      } else if (bodyHtml.includes("Manage Categories")) {
         cy.contains("Manage Categories").click({ force: true });
-      }
-      // Strategy 3: Look for just "Categories" text (case insensitive)
-      else if (bodyHtml.match(/categories/i)) {
-        cy.log('Found "Categories" text');
+      } else if (bodyHtml.match(/categories/i)) {
         cy.contains(/categories/i)
           .first()
           .click({ force: true });
-      }
-      // Strategy 4: Look for card or button with Categories
-      else {
-        cy.log("Using fallback selector");
+      } else {
         cy.get("div, button, a")
           .contains(/categor/i)
           .first()
@@ -69,23 +55,17 @@ class DashboardPage {
 
   clickManagePlantsButton() {
     cy.wait(1500);
-
     cy.get("body").then(($body) => {
       const bodyHtml = $body.html();
-
       if ($body.find('a[href*="/plants"]').length > 0) {
-        cy.log("Found Plants via href");
         cy.get('a[href*="/plants"]').first().click({ force: true });
       } else if (bodyHtml.includes("Manage Plants")) {
-        cy.log('Found "Manage Plants" text');
         cy.contains("Manage Plants").click({ force: true });
       } else if (bodyHtml.match(/plants/i)) {
-        cy.log('Found "Plants" text');
         cy.contains(/plants/i)
           .first()
           .click({ force: true });
       } else {
-        cy.log("Using fallback selector");
         cy.get("div, button, a")
           .contains(/plants/i)
           .first()
@@ -96,21 +76,15 @@ class DashboardPage {
 
   clickViewSalesButton() {
     cy.wait(1500);
-
     cy.get("body").then(($body) => {
       const bodyHtml = $body.html();
-
       if ($body.find('a[href*="/sales"]').length > 0) {
-        cy.log("Found Sales via href");
         cy.get('a[href*="/sales"]').first().click({ force: true });
       } else if (bodyHtml.includes("View Sales")) {
-        cy.log('Found "View Sales" text');
         cy.contains("View Sales").click({ force: true });
       } else if (bodyHtml.includes("Sales")) {
-        cy.log('Found "Sales" text');
         cy.contains(/sales/i).first().click({ force: true });
       } else {
-        cy.log("Using fallback selector");
         cy.get("div, button, a")
           .contains(/sales/i)
           .first()
@@ -120,15 +94,11 @@ class DashboardPage {
   }
 
   verifySidebarHighlight(itemName) {
-    // More lenient sidebar check
     cy.get("body", { timeout: 10000 }).should("contain", itemName);
-    cy.log(`Verified "${itemName}" is present on page`);
   }
 
   verifySidebarNotActive(itemName) {
-    // More lenient check - just verify it exists but isn't the current page
     cy.get("body", { timeout: 10000 }).should("contain", itemName);
-    cy.log(`Verified "${itemName}" is present but not active`);
   }
 
   verifyButtonNotVisible(buttonName) {
@@ -145,9 +115,7 @@ class DashboardPage {
   }
 
   verifyEditDeleteIconsNotVisible() {
-    // Check that edit and delete buttons/icons are not visible (for read-only mode)
     cy.get("body").then(($body) => {
-      // Look for visible buttons/links/icons with edit or delete functionality
       const editButtons = $body
         .find(
           'button, a, [role="button"], .btn, .icon, i, svg, [class*="edit"], [class*="action"]',
@@ -194,8 +162,6 @@ class DashboardPage {
             ariaDisabled === "true" ||
             className.includes("disabled") ||
             className.includes("is-disabled");
-
-          // More strict criteria: must have explicit delete/remove indicators
           const hasDeleteText =
             text.includes("delete") || text.includes("remove");
           const hasDeleteAttribute =
@@ -218,9 +184,6 @@ class DashboardPage {
           );
         });
 
-      cy.log(`Found ${editButtons.length} edit buttons/icons`);
-      cy.log(`Found ${deleteButtons.length} delete buttons/icons`);
-
       expect(
         editButtons.length,
         "No visible edit buttons/icons should be present",
@@ -233,9 +196,7 @@ class DashboardPage {
   }
 
   verifyEditDeleteIconsVisible() {
-    // Check that edit and delete buttons/icons ARE visible (for users with permissions)
     cy.get("body").then(($body) => {
-      // Look for visible buttons/links/icons with edit or delete functionality
       const editButtons = $body
         .find(
           'button, a, [role="button"], .btn, .icon, i, svg, [class*="edit"], [class*="action"]',
@@ -280,9 +241,6 @@ class DashboardPage {
           );
         });
 
-      cy.log(`Found ${editButtons.length} edit buttons/icons`);
-      cy.log(`Found ${deleteButtons.length} delete buttons/icons`);
-
       expect(
         editButtons.length,
         "At least one visible edit button/icon should be present",
@@ -295,7 +253,6 @@ class DashboardPage {
   }
 
   verifyDeleteIconsNotVisible() {
-    // Check that delete buttons/icons are not visible (for read-only mode)
     cy.get("body").then(($body) => {
       const deleteButtons = $body
         .find(
@@ -320,8 +277,6 @@ class DashboardPage {
               className.includes("remove"))
           );
         });
-
-      cy.log(`Found ${deleteButtons.length} delete buttons/icons`);
 
       expect(
         deleteButtons.length,

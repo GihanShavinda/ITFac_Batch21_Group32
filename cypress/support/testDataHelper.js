@@ -1,5 +1,3 @@
-// cypress/support/testDataHelper.js
-
 export const generateUniqueCategory = () => {
   const timestamp = Date.now().toString().slice(-5);
   return `Cat${timestamp}`;
@@ -15,7 +13,6 @@ export const createTestDataWithSubCategory = (token) => {
   const subCatName = `Sub${Date.now().toString().slice(-5)}`;
   const plantName = generateUniquePlant();
 
-  // Create main category, then sub-category, then plant
   return cy.request({
     method: 'POST',
     url: '/api/categories',

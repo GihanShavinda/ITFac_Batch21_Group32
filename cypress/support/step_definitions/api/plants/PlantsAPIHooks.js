@@ -1,15 +1,7 @@
 import { Before, After } from '@badeball/cypress-cucumber-preprocessor';
 
-// Dummy response so @createPlantResponse exists even if scenario fails before the When step.
-// The When step overwrites this with the real API response.
 const dummyCreateResponse = { body: {}, status: 0 };
 
-/**
- * PLANTS API HOOKS – Keep database stable for Plant API tests
- * Pattern: Before (set aliases when needed); After (DELETE or restore via API).
- * Uses DELETE /api/plants/{id} with Bearer token. Same pattern in PlantsHooks.js for UI.
- */
-/** TC_API_PLT_ADMIN_01: Before = dummy alias; After = delete created plant. */
 Before({ tags: '@TC_API_PLT_ADMIN_01' }, function () {
   cy.wrap(dummyCreateResponse).as('createPlantResponse');
 });
@@ -30,7 +22,6 @@ After({ tags: '@TC_API_PLT_ADMIN_01' }, function () {
   });
 });
 
-/** After TC_API_PLT_ADMIN_02: delete the plant created/updated in the scenario. */
 After({ tags: '@TC_API_PLT_ADMIN_02' }, function () {
   cy.get('@apiPlantId', { timeout: 0 }).then((id) => {
     cy.get('@authToken').then((token) => {
@@ -44,7 +35,6 @@ After({ tags: '@TC_API_PLT_ADMIN_02' }, function () {
   });
 });
 
-/** After TC_API_PLT_ADMIN_05 (quantity 0 scenario only): delete the plant created. Negative-quantity scenario does not set @apiPlantIdForCleanup. */
 After({ tags: '@TC_API_PLT_ADMIN_05_cleanup' }, function () {
   cy.get('@apiPlantIdForCleanup', { timeout: 0 }).then((id) => {
     cy.get('@authToken').then((token) => {
@@ -58,7 +48,6 @@ After({ tags: '@TC_API_PLT_ADMIN_05_cleanup' }, function () {
   });
 });
 
-/** After TC_API_PLT_USER_04 and TC_API_PLT_USER_05: delete the plant created by admin (authToken is user at end, so re-login as admin to delete). */
 function afterUserUnauthorizedPlant() {
   cy.get('@apiPlantId', { timeout: 0 }).then((id) => {
     cy.env(['adminUsername', 'adminPassword']).then((env) => {

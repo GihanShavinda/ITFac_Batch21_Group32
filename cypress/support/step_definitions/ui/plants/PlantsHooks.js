@@ -1,12 +1,5 @@
 import { Before, After } from '@badeball/cypress-cucumber-preprocessor';
 
-/**
- * PLANTS UI HOOKS – Keep database stable for Plant UI tests
- * Same pattern as PlantsAPIHooks.js: Before/After so every run cleans up created or
- * modified data. After hooks log in via API, then DELETE or PUT /api/plants/{id}.
- * Assumes: GET /api/plants returns a list (array or { content: [] } for pageable APIs).
- */
-
 function adminLoginBody() {
   return cy.env(['adminUsername', 'adminPassword']).then((env) => ({
     username: env.adminUsername || 'admin',
@@ -14,7 +7,6 @@ function adminLoginBody() {
   }));
 }
 
-/** TC_UI_PLT_ADMIN_01: Add plant – After: delete the created plant (lookup by @newPlantName). */
 After({ tags: '@TC_UI_PLT_ADMIN_01' }, function () {
   cy.get('@newPlantName').then((name) => {
     adminLoginBody().then((body) => {
@@ -50,9 +42,6 @@ After({ tags: '@TC_UI_PLT_ADMIN_01' }, function () {
   });
 });
 
-/** TC_UI_PLT_ADMIN_03: Edit plant – Before: store first plant's data; After: restore via PUT.
- * Assumes API list order matches UI first row.
- */
 Before({ tags: '@TC_UI_PLT_ADMIN_03' }, function () {
   cy.wrap(null).as('editPlantOriginal');
   adminLoginBody().then((body) => {
@@ -114,10 +103,6 @@ Before({ tags: '@TC_UI_PLT_ADMIN_03' }, function () {
     });
   });
 
-  /**
-   * TC_UI_PLT_ADMIN_04: Delete plant – Before: create a plant so the scenario deletes test data.
-   * No After (the scenario deletes it).
-   */
   Before({ tags: '@TC_UI_PLT_ADMIN_04' }, function () {
     const name = `AAA-DeleteTest-${Date.now()}`;
     cy.wrap(name).as('deleteTestPlantName');
@@ -141,7 +126,6 @@ Before({ tags: '@TC_UI_PLT_ADMIN_03' }, function () {
     });
   });
 
-    /** TC_UI_PLT_ADMIN_05: Low stock badge – After: delete the plant (alias @lowStockPlantName). */
     After({ tags: '@TC_UI_PLT_ADMIN_05' }, function () {
       cy.get('@lowStockPlantName').then((name) => {
         adminLoginBody().then((body) => {

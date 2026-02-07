@@ -1,7 +1,5 @@
-// cypress/support/step_definitions/api/AuthSteps.js
 import { Given } from '@badeball/cypress-cucumber-preprocessor';
 
-// Shared by DashboardAPI and CategoriesViewAPI features
 Given('I am authenticated as {string} via API', (role) => {
   const credentials = {
     admin: { username: Cypress.env('adminUsername') || 'admin', password: Cypress.env('adminPassword') || 'admin123' },
@@ -43,7 +41,6 @@ Given('I am authenticated as admin for API', () => {
     if (res.status === 200 && res.body?.token) {
       cy.wrap(res.body.token).as('authToken');
     } else {
-      // Don't throw error - just wrap null
       cy.wrap(null).as('authToken');
     }
   });
@@ -58,7 +55,6 @@ Given('I am authenticated as user for API', () => {
 
   const tryAuth = (credIndex = 0) => {
     if (credIndex >= userCredentials.length) {
-      cy.log('User account not found. Using admin account for API testing.');
       return cy.request({
         method: 'POST',
         url: '/api/auth/login',

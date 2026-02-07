@@ -1,5 +1,3 @@
-// cypress/support/commands.js
-// Custom Commands
 Cypress.Commands.add('login', (username, password) => {
   cy.visit('/login');
   cy.get('#username').type(username);
@@ -7,7 +5,6 @@ Cypress.Commands.add('login', (username, password) => {
   cy.get('button[type="submit"]').click();
 });
 
-// Paginate to the last page (new items often appear at the end). Tries "Last" link first, else clicks "Next" until disabled.
 Cypress.Commands.add('goToLastPage', (maxClicks = 50) => {
   cy.get('body').then(($body) => {
     const $last = $body.find('a, button').filter((i, el) => Cypress.$(el).text().trim() === 'Last');

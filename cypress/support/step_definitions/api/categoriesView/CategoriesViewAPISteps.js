@@ -1,9 +1,5 @@
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
-// "I am authenticated as {string} via API" is defined in api/AuthSteps.js
-// "I send a GET request to {string}" is defined in api/SharedAPISteps.js
-// "the response status code should be {int}" and "the response should contain valid JSON data" are in api/SharedAPISteps.js
-
 Then(
   "the response should contain a list of categories with id, name, parent, and subCategories",
   () => {
@@ -166,8 +162,6 @@ Then("the response should contain summary data", () => {
       const parsedBody = typeof body === "string" ? JSON.parse(body) : body;
       expect(parsedBody).to.be.an("object");
 
-      cy.log("Summary response body:", parsedBody);
-
       const summaryFields = [
         "totalCategories",
         "totalSubCategories",
@@ -191,7 +185,6 @@ Then("the response should contain summary data", () => {
             Array.isArray(value)
           ) {
             hasValidData = true;
-            cy.log(`Found summary field: ${field} =`, value);
           }
         }
       }
@@ -200,7 +193,6 @@ Then("the response should contain summary data", () => {
         const keys = Object.keys(parsedBody);
         if (keys.length > 0) {
           hasValidData = true;
-          cy.log("Response has data fields:", keys);
         }
       }
 
@@ -235,8 +227,6 @@ Then("the response should contain a list of subcategories", () => {
 
       expect(subcategoriesList).to.be.an("array");
 
-      cy.log(`Found ${subcategoriesList.length} subcategories`);
-
       if (subcategoriesList.length > 0) {
         subcategoriesList.forEach((subcategory) => {
           expect(subcategory).to.be.an("object");
@@ -268,7 +258,6 @@ Then("the response should contain main category list", () => {
     }
 
     expect(mainCategoryList).to.be.an("array");
-    cy.log(`Found ${mainCategoryList.length} main categories`);
 
     if (mainCategoryList.length > 0) {
       mainCategoryList.forEach((category) => {
@@ -306,7 +295,6 @@ Then("the response should contain pagination information", () => {
     for (const field of paginationFields) {
       if (Object.prototype.hasOwnProperty.call(parsedBody, field)) {
         hasPaginationField = true;
-        cy.log(`Found pagination field: ${field} =`, parsedBody[field]);
       }
     }
 

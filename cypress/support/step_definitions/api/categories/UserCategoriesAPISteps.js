@@ -1,11 +1,7 @@
 import { When, Then, Given } from '@badeball/cypress-cucumber-preprocessor';
 
-// "I am authenticated as user for API" is defined in api/AuthSteps.js (sets authToken)
-
-// Verify a category exists (for update/delete tests)
 Given('a category exists with id {int}', (categoryId) => {
   cy.wrap(categoryId).as('existingCategoryId');
-  // Optional: Verify the category exists by making a GET request as admin
   cy.request({
     method: 'POST',
     url: '/api/auth/login',
@@ -22,18 +18,11 @@ Given('a category exists with id {int}', (categoryId) => {
         url: `/api/categories/${categoryId}`,
         headers: { Authorization: `Bearer ${adminToken}` },
         failOnStatusCode: false,
-      }).then((res) => {
-        if (res.status === 200) {
-          cy.log(`Category ${categoryId} exists`);
-        } else {
-          cy.log(`Category ${categoryId} may not exist, test will proceed anyway`);
-        }
-      });
+      }).then(() => {});
     }
   });
 });
 
-// POST /api/categories as user (should fail with 403)
 When(
   'I send a POST request to create a category as user with name {string} and parentId null',
   (name) => {
@@ -50,15 +39,12 @@ When(
         },
         failOnStatusCode: false,
       }).then((response) => {
-        cy.log(`Response status: ${response.status}`);
-        cy.log(`Response body: ${JSON.stringify(response.body)}`);
         cy.wrap(response).as('userCategoryResponse');
       });
     });
   }
 );
 
-// PUT /api/categories/{id} as user (should fail with 403)
 When(
   'I send a PUT request to update category with id {int} and name {string}',
   (categoryId, name) => {
@@ -75,15 +61,12 @@ When(
         },
         failOnStatusCode: false,
       }).then((response) => {
-        cy.log(`Response status: ${response.status}`);
-        cy.log(`Response body: ${JSON.stringify(response.body)}`);
         cy.wrap(response).as('userCategoryResponse');
       });
     });
   }
 );
 
-// DELETE /api/categories/{id} as user (should fail with 403)
 When('I send a DELETE request to delete category with id {int}', (categoryId) => {
   cy.get('@authToken').then((token) => {
     cy.request({
@@ -94,8 +77,6 @@ When('I send a DELETE request to delete category with id {int}', (categoryId) =>
       },
       failOnStatusCode: false,
     }).then((response) => {
-      cy.log(`Response status: ${response.status}`);
-      cy.log(`Response body: ${JSON.stringify(response.body)}`);
       cy.wrap(response).as('userCategoryResponse');
     });
   });

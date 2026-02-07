@@ -1,4 +1,3 @@
-// cypress/pages/sales/SalesPage.js
 class SalesPage {
   elements = {
     pageTitle: () => cy.contains('h1', 'Sales'),
@@ -11,8 +10,6 @@ class SalesPage {
     alertSuccess: () => cy.get('.alert-success'),
     alertDanger: () => cy.get('.alert-danger'),
     noSalesMessage: () => cy.contains('No sales found'),
-    
-    // Sell Plant Form
     plantDropdown: () => cy.get('select[name="plantId"]'),
     quantityInput: () => cy.get('input[name="quantity"]'),
     sellButton: () => cy.contains('button', 'Sell'),

@@ -1,16 +1,10 @@
-// cypress/support/step_definitions/sales/SalesSteps.js
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 import SalesPage from '../../../../pages/sales/SalesPage';
 
-// Helper to clean database
 const cleanDatabase = (token, attempt = 1) => {
   if (attempt > 3) {
-    cy.log('Max cleanup retries reached. Some data may persist.');
     return;
   }
-
-  cy.log(`Optimization Cleanup Attempt ${attempt}...`);
-  // Request a large page size to get as many as possible
   return cy.request({
     method: 'GET',
     url: '/api/sales/page?size=1000', 
@@ -19,9 +13,6 @@ const cleanDatabase = (token, attempt = 1) => {
   }).then((res) => {
     const sales = res.body.content || res.body;
     if (Array.isArray(sales) && sales.length > 0) {
-      cy.log(`Found ${sales.length} sales. Queueing deletion...`);
-      
-      // Queue all deletions immediately
       sales.forEach((sale) => {
         cy.request({
           method: 'DELETE',
@@ -30,14 +21,8 @@ const cleanDatabase = (token, attempt = 1) => {
           failOnStatusCode: false
         });
       });
-      
-      // Verification phase
-      cy.log('Verifying cleanup...');
-      cy.wait(1000); // Give backend a moment to process
+      cy.wait(1000);
       cleanDatabase(token, attempt + 1);
-      
-    } else {
-      cy.log('Database already clean.');
     }
   });
 };
@@ -99,7 +84,6 @@ Given('multiple sales exist', () => {
 });
 
 Given('a sale exists for a plant', () => {
-  // Set up the confirm stub BEFORE creating the sale
   cy.window().then((win) => {
     if (!win.confirmStub) {
       win.confirmStub = cy.stub(win, 'confirm').as('confirmStub');
@@ -115,17 +99,12 @@ Given('a sale exists for a plant', () => {
     }
   }).then((res) => {
     const token = res.body.token;
-    
-    // CLEAN DB FIRST to avoid ghost data - TIMEOUT INCREASED
     const originalTimeout = Cypress.config('defaultCommandTimeout');
     Cypress.config('defaultCommandTimeout', 120000);
-
     cy.wrap(null).then(() => {
         return cleanDatabase(token);
     }).then(() => {
         Cypress.config('defaultCommandTimeout', originalTimeout);
-        cy.log('All sales deleted successfully via helper');
-        
         cy.request({
           method: 'GET',
           url: '/api/plants',
@@ -151,7 +130,7 @@ Given('a sale exists for a plant', () => {
             }).then((saleRes) => {
               cy.wrap(saleRes.body).as('testSale');
               cy.wrap(plant).as('testPlant');
-              cy.wrap(token).as('adminToken'); // Save token for later
+              cy.wrap(token).as('adminToken');
               cy.wait(1000);
             });
           });
@@ -170,9 +149,7 @@ Given('no sales exist', () => {
     }
   }).then((res) => {
     const token = res.body.token;
-    cy.wrap(token).as('deleteToken'); // Save for verification
-    
-    // CLEAN DB FIRST to avoid ghost data - TIMEOUT INCREASED
+    cy.wrap(token).as('deleteToken');
     const originalTimeout = Cypress.config('defaultCommandTimeout');
     Cypress.config('defaultCommandTimeout', 120000);
 
@@ -180,7 +157,6 @@ Given('no sales exist', () => {
         return cleanDatabase(token);
     }).then(() => {
         Cypress.config('defaultCommandTimeout', originalTimeout);
-        cy.log('All sales deleted successfully via helper');
     });
   });
 });
@@ -242,8 +218,6 @@ When('I enter quantity greater than stock', () => {
 When('I click delete icon and confirm', () => {
     cy.get('@testPlant').then((plant) => {
     const plantName = plant.name || plant.plant?.name;
-    
-    // Setup listener BEFORE click
     cy.on('window:confirm', () => true);
     
     cy.contains('tr', plantName, { timeout: 10000 })
@@ -258,8 +232,6 @@ When('I click delete icon and confirm', () => {
 When('I click delete icon and cancel', () => {
   cy.get('@testPlant').then((plant) => {
     const plantName = plant.name || plant.plant?.name;
-    
-    // Setup listener BEFORE click
     cy.on('window:confirm', () => false);
     
     cy.contains('tr', plantName, { timeout: 10000 })
@@ -299,8 +271,6 @@ Then('I should see pagination controls', () => {
   cy.get('@paginationExists').then((exists) => {
     if (exists) {
       cy.get('.pagination').should('exist');
-    } else {
-      cy.log('SKIP: Pagination not present');
     }
   });
 });
@@ -343,9 +313,7 @@ Then('I should see error message about stock availability', () => {
   });
 });
 
-Then('sale should not be created in database', () => {
-  cy.log('Sale creation blocked by validation');
-});
+Then('sale should not be created in database', () => {});
 
 Then('I should be redirected to sales list', () => {
   cy.url({ timeout: 15000 }).should('include', '/ui/sales');
@@ -398,13 +366,8 @@ Then('the sale should NOT be deleted from database', () => {
 });
 
 Then('the sale should remain in the sales list', () => {
-  // No explicit stub check needed as event listener handles it
-  
-  // Reload and check table
   cy.reload();
   cy.wait(1000);
-  
-  // Verify sale still exists in UI
   cy.get('@testSale').then((sale) => {
     cy.get('@adminToken').then((token) => {
       cy.request({
@@ -430,16 +393,11 @@ Then('no admin actions should be visible', () => {
 });
 
 Then('I should see message {string}', (message) => {
-  // Extra long wait for all deletions to complete
   cy.wait(8000);
-  
-  // Reload multiple times to ensure fresh data
   cy.reload();
   cy.wait(2000);
   cy.reload();
   cy.wait(2000);
-  
-  // Verify via API first
   cy.get('@deleteToken').then((token) => {
     cy.request({
       method: 'GET',
@@ -447,31 +405,16 @@ Then('I should see message {string}', (message) => {
       headers: { Authorization: `Bearer ${token}` }
     }).then((salesRes) => {
       const sales = salesRes.body.content || salesRes.body;
-      cy.log(`API shows ${sales.length} sales after deletion`);
-      
-      // API should show 0 sales
       expect(sales.length).to.equal(0);
     });
   });
-  
-  // Now check the UI
   cy.get('body').then($body => {
     const rows = $body.find('table tbody tr');
-    cy.log(`UI shows ${rows.length} rows in table`);
-    
     if (rows.length === 0) {
-      cy.log('Table is empty');
-      
-      // Look for "No sales found" message
       if ($body.text().includes(message)) {
-        cy.log(`Found message: "${message}"`);
         cy.get('body').should('contain', message);
-      } else {
-        cy.log('Message not found but table is empty - PASS');
       }
     } else {
-      // Table still has rows - FAIL
-      cy.log(`ERROR: Table still has ${rows.length} rows`);
       expect(rows.length).to.equal(0);
     }
   });

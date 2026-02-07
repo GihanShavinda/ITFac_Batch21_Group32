@@ -1,4 +1,3 @@
-// cypress/support/step_definitions/ui/auth/LoginSteps.js
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
 import LoginPage from '../../../../pages/LoginPage';
 
@@ -27,8 +26,6 @@ Given('I am logged in as admin', () => {
   LoginPage.enterUsername(Cypress.env('adminUsername') || 'admin');
   LoginPage.enterPassword(Cypress.env('adminPassword') || 'admin123');
   LoginPage.clickLogin();
-  
-  // Verify login was successful
   cy.url().should('not.include', '/login', { timeout: 10000 });
 });
 
