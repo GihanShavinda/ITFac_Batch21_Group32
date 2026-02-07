@@ -27,9 +27,7 @@ When(
   }
 );
 
-Then('the response status should be {int}', (status) => {
-  cy.get('@lastApiResponse').its('status').should('eq', status);
-});
+// "the response status should be {int}" is defined in api/SharedAPISteps.js (uses lastApiResponse when set)
 
 Then('the response body should contain plant details', () => {
   cy.get('@lastApiResponse').its('body').then((body) => {
@@ -41,7 +39,6 @@ Then('the response body should contain plant details', () => {
   });
 });
 
-// --- TC_API_PLT_ADMIN_02: Update plant ---
 Given('a plant exists for API in category {int}', (categoryId) => {
   cy.get('@authToken').then((token) => {
     const name = `ApiPlant-${Date.now()}`;
@@ -63,13 +60,16 @@ Given('a plant exists for API in category {int}', (categoryId) => {
 });
 
 When('I send a PUT request to update the plant with name {string} price {int} quantity {int}', (name, price, quantity) => {
+  // API requires name length 3–25; keep unique to avoid DB duplicate (name, category_id)
+  const uniqueName = `Rose-${Date.now().toString().slice(-8)}`;
+  cy.wrap(uniqueName).as('updatedPlantName');
   cy.get('@authToken').then((token) => {
     cy.get('@apiPlantId').then((id) => {
       cy.request({
         method: 'PUT',
         url: `/api/plants/${id}`,
         headers: { Authorization: `Bearer ${token}` },
-        body: { name, price, quantity },
+        body: { name: uniqueName, price, quantity },
         failOnStatusCode: false,
       }).then((res) => {
         cy.wrap(res).as('lastApiResponse');
@@ -84,6 +84,17 @@ Then('the response body should contain name {string} price {int} quantity {int}'
     if (body.name !== undefined) expect(body.name).to.equal(name);
     if (body.price !== undefined) expect(Number(body.price)).to.equal(price);
     if (body.quantity !== undefined) expect(Number(body.quantity)).to.equal(quantity);
+  });
+});
+
+Then('the response body should contain the updated plant name and price {int} quantity {int}', (price, quantity) => {
+  cy.get('@updatedPlantName').then((expectedName) => {
+    cy.get('@lastApiResponse').its('body').then((body) => {
+      expect(body).to.be.an('object');
+      if (body.name !== undefined) expect(body.name).to.equal(expectedName);
+      if (body.price !== undefined) expect(Number(body.price)).to.equal(price);
+      if (body.quantity !== undefined) expect(Number(body.quantity)).to.equal(quantity);
+    });
   });
 });
 

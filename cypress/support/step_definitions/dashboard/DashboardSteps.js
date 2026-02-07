@@ -28,14 +28,12 @@ Then("the page should load within {int} seconds", (seconds) => {
 });
 
 Then("no errors should occur during navigation", () => {
-  // Check for common error indicators
-  cy.get("body").should("not.contain", "Error");
-  cy.get("body").should("not.contain", "404");
-  cy.get("body").should("not.contain", "500");
-
-  // Verify no console errors (if you have error logging setup)
+  // Check for error-page phrases only (bare "500"/"404" can appear in dashboard data)
+  cy.get("body").invoke("text").then((text) => {
+    expect(text).not.to.match(/Internal Server Error|500 Internal|Error 500/i);
+    expect(text).not.to.match(/404 Not Found|Not Found\s*404/i);
+  });
   cy.window().then((win) => {
-    // Optional: Check if error elements are not present
     expect(win.document.querySelector(".error-message")).to.be.null;
   });
 });

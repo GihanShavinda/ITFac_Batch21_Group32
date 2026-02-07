@@ -21,7 +21,7 @@ Feature: Plants API
     When I send a PUT request to update the plant with name "Updated Rose" price 15 quantity 8
     Then the response status should be 200
     And the response body should contain plant details
-    And the response body should contain name "Updated Rose" price 15 quantity 8
+    And the response body should contain the updated plant name and price 15 quantity 8
 
   # TC_API_PLT_ADMIN_03: Delete plant API
   # Preconditions: Admin authenticated; a plant exists with known ID.

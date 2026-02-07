@@ -1,10 +1,37 @@
-import { Then } from '@badeball/cypress-cucumber-preprocessor';
+import { When, Then } from '@badeball/cypress-cucumber-preprocessor';
+
+// Shared by DashboardAPI and CategoriesViewAPI features
+When('I send a GET request to {string}', (endpoint) => {
+  cy.get('@authToken').then((token) => {
+    cy.request({
+      method: 'GET',
+      url: endpoint,
+      headers: { Authorization: `Bearer ${token}` },
+      failOnStatusCode: false,
+    }).as('apiResponse');
+  });
+});
+
+// Shared step for checking response status/code (Dashboard + CategoriesView use apiResponse)
+Then('the response status code should be {int}', (status) => {
+  cy.get('@apiResponse').its('status').should('eq', status);
+});
+
+// Shared step (Dashboard + CategoriesView)
+Then('the response should contain valid JSON data', () => {
+  cy.get('@apiResponse').then((response) => {
+    expect(response.body).to.not.be.null;
+    expect(response.body).to.not.be.undefined;
+    const bodyStr = JSON.stringify(response.body);
+    expect(() => JSON.parse(bodyStr)).to.not.throw();
+  });
+});
 
 // Shared step for checking response status across all API tests
 // Works with any response alias: @createCategoryResponse, @createPlantResponse, etc.
 Then('the response status should be {int}', (status) => {
   // Try common response aliases in order
-  const aliases = ['createCategoryResponse', 'createPlantResponse', 'createSaleResponse', 'apiResponse', 'userCategoryResponse'];
+  const aliases = ['createCategoryResponse', 'createPlantResponse', 'createSaleResponse', 'apiResponse', 'userCategoryResponse', 'lastApiResponse'];
   
   // Find which alias exists
   const allAliases = Cypress.state('aliases') || {};
@@ -20,7 +47,7 @@ Then('the response status should be {int}', (status) => {
 // Shared step for checking error messages in response body across all API tests
 Then('the response body should contain error message {string}', (expectedMessage) => {
   // Try common response aliases in order
-  const aliases = ['createCategoryResponse', 'createPlantResponse', 'createSaleResponse', 'apiResponse', 'userCategoryResponse'];
+  const aliases = ['createCategoryResponse', 'createPlantResponse', 'createSaleResponse', 'apiResponse', 'userCategoryResponse', 'lastApiResponse'];
   
   // Find which alias exists
   const allAliases = Cypress.state('aliases') || {};

@@ -1,122 +1,7 @@
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
-// ---- Authenticate as specified role via API ----
-Given("I am authenticated as {string} via API", (role) => {
-  const credentials = {
-    admin: { username: "admin", password: "admin123" },
-    user: { username: "testuser", password: "test123" },
-    testuser: { username: "testuser", password: "test123" },
-    "sales manager": {
-      username: "salesmanager@test.com",
-      password: "password123",
-    },
-  };
-
-  const cred = credentials[role.toLowerCase()] || credentials.admin;
-
-  cy.request({
-    method: "POST",
-    url: "/api/auth/login",
-    body: {
-      username: cred.username,
-      password: cred.password,
-    },
-    failOnStatusCode: false,
-  }).then((res) => {
-    if (res.status === 200 && res.body?.token) {
-      cy.log(`Successfully authenticated as ${role} (${cred.username})`);
-      cy.wrap(res.body.token).as("authToken");
-    } else {
-      cy.log(
-        `Authentication failed: ${res.status} - ${JSON.stringify(res.body)}`,
-      );
-      throw new Error(
-        `Could not authenticate as ${role} (${cred.username}/${cred.password}). Status: ${res.status}`,
-      );
-    }
-  });
-});
-
-// ---- Authenticate as User for API (with fallback to admin if user account doesn't exist) ----
-Given("I am authenticated as user for API", () => {
-  // Try multiple credential combinations for user role
-  const userCredentials = [
-    { username: "testuser", password: "test123" },
-    { username: "user", password: "user123" },
-    { username: "user", password: "test123" },
-  ];
-
-  const tryAuth = (credIndex = 0) => {
-    if (credIndex >= userCredentials.length) {
-      // If no user account exists, use admin account for API testing
-      cy.log(
-        "User account not found in backend. Using admin account to test API endpoints.",
-      );
-      cy.request({
-        method: "POST",
-        url: "/api/auth/login",
-        body: {
-          username: "admin",
-          password: "admin123",
-        },
-        failOnStatusCode: false,
-      }).then((res) => {
-        if (res.status === 200 && res.body?.token) {
-          cy.log("Authenticated as admin (fallback for user test)");
-          cy.wrap(res.body.token).as("authToken");
-        } else {
-          throw new Error(
-            "Could not authenticate as admin. Backend may be unavailable.",
-          );
-        }
-      });
-      return;
-    }
-
-    const cred = userCredentials[credIndex];
-    cy.request({
-      method: "POST",
-      url: "/api/auth/login",
-      body: {
-        username: Cypress.env("userUsername") || cred.username,
-        password: Cypress.env("userPassword") || cred.password,
-      },
-      failOnStatusCode: false,
-    }).then((res) => {
-      if (res.status === 200 && res.body?.token) {
-        cy.log(`Successfully authenticated as ${cred.username}`);
-        cy.wrap(res.body.token).as("authToken");
-      } else if (credIndex < userCredentials.length - 1) {
-        cy.log(
-          `Auth failed with ${cred.username}/${cred.password} (${res.status}), trying next...`,
-        );
-        tryAuth(credIndex + 1);
-      } else {
-        // All user credentials failed, try admin as fallback
-        tryAuth(userCredentials.length);
-      }
-    });
-  };
-
-  tryAuth();
-});
-
-// ---- Authenticate as Admin for API ----
-// This step is defined in AuthSteps.js, removed duplicate here to avoid conflicts
-
-// ---- Authenticated GET request ----
-When("I send a GET request to {string}", function (endpoint) {
-  cy.get("@authToken").then((token) => {
-    cy.request({
-      method: "GET",
-      url: endpoint,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      failOnStatusCode: false,
-    }).as("apiResponse");
-  });
-});
+// "I am authenticated as {string} via API" is defined in api/AuthSteps.js
+// "I send a GET request to {string}" is defined in api/SharedAPISteps.js
 
 // ---- Unauthenticated GET request ----
 When("I send an unauthenticated GET request to {string}", (endpoint) => {
@@ -127,19 +12,7 @@ When("I send an unauthenticated GET request to {string}", (endpoint) => {
   }).as("apiResponse");
 });
 
-// ---- Response status validation ----
-Then("the response status should be {int}", function (statusCode) {
-  cy.get("@apiResponse").then((response) => {
-    expect(response.status).to.eq(statusCode);
-  });
-});
-
-// Alias for status code
-Then("the response status code should be {int}", function (statusCode) {
-  cy.get("@apiResponse").then((response) => {
-    expect(response.status).to.eq(statusCode);
-  });
-});
+// "the response status should be {int}" and "the response status code should be {int}" are in api/SharedAPISteps.js
 
 // ---- Response body not empty ----
 Then("the response body should not be empty", function () {
@@ -164,14 +37,7 @@ Then("the response should be a valid JSON", function () {
   });
 });
 
-Then("the response should contain valid JSON data", function () {
-  cy.get("@apiResponse").then((response) => {
-    expect(response.body).to.not.be.null;
-    expect(response.body).to.not.be.undefined;
-    const bodyStr = JSON.stringify(response.body);
-    expect(() => JSON.parse(bodyStr)).to.not.throw();
-  });
-});
+// "the response should contain valid JSON data" is defined in api/SharedAPISteps.js
 
 // ---- Store response for later comparison ----
 Then("I store the response body as {string}", function (alias) {

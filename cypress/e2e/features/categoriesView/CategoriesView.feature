@@ -15,11 +15,11 @@ Feature: Categories View Management
   @ui @admin @TC_UI_CAT_ADMIN_02
   Scenario: TC_UI_CAT_ADMIN_02 - Search functionality works
     Given I am logged in as admin
-    And a category named "flower" exists
+    And a category named "Liverworts" exists
     When I navigate to categories view page
-    And I enter "flower" in the search field
+    And I enter "Liverworts" in the search field
     And I click the Search button on categories view
-    Then the search result should contain "flower"
+    Then the search result should contain "Liverworts"
 
   @ui @admin @TC_UI_CAT_ADMIN_03
   Scenario: TC_UI_CAT_ADMIN_03 - Search categories by valid category name

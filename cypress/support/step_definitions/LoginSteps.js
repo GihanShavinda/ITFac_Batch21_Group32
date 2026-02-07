@@ -37,9 +37,7 @@ Given('I am logged in as user', () => {
   LoginPage.enterUsername(Cypress.env('userUsername') || 'user');
   LoginPage.enterPassword(Cypress.env('userPassword') || 'user123');
   LoginPage.clickLogin();
-  
-  // Wait a bit for login to complete or redirect on error
-  cy.wait(1000);
+  cy.url().should('not.include', '/login', { timeout: 10000 });
 });
 
 Given('I am logged in as test user', () => {
@@ -53,12 +51,5 @@ Given('I am logged in as sales manager', () => {
   LoginPage.visit();
   LoginPage.enterUsername('salesmanager@test.com');
   LoginPage.enterPassword('password123');
-  LoginPage.clickLogin();
-});
-
-Given('I am logged in as user', () => {
-  LoginPage.visit();
-  LoginPage.enterUsername(Cypress.env('userUsername') || 'testuser');
-  LoginPage.enterPassword(Cypress.env('userPassword') || 'test123');
   LoginPage.clickLogin();
 });

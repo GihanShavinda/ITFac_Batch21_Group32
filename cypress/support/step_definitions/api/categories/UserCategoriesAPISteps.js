@@ -1,33 +1,6 @@
 import { When, Then, Given } from '@badeball/cypress-cucumber-preprocessor';
 
-// User authentication for API tests
-Given('I am authenticated as user for API', () => {
-  const token = Cypress.env('userToken');
-  if (token) {
-    cy.wrap(token).as('userAuthToken');
-    return;
-  }
-  cy.request({
-    method: 'POST',
-    url: '/api/auth/login',
-    body: {
-      username: Cypress.env('userUsername') || 'user',
-      password: Cypress.env('userPassword') || 'user123',
-    },
-    failOnStatusCode: false,
-  }).then((res) => {
-    cy.log(`User login response status: ${res.status}`);
-    cy.log(`User login response body: ${JSON.stringify(res.body)}`);
-    if (res.status === 200 && res.body?.token) {
-      cy.wrap(res.body.token).as('userAuthToken');
-      cy.log(`User authenticated successfully with token`);
-    } else {
-      cy.log('Warning: Could not get user auth token. Test may fail.');
-      // Wrap empty token to allow test to continue and fail at API call
-      cy.wrap('invalid-token').as('userAuthToken');
-    }
-  });
-});
+// "I am authenticated as user for API" is defined in api/AuthSteps.js (sets authToken)
 
 // Verify a category exists (for update/delete tests)
 Given('a category exists with id {int}', (categoryId) => {
@@ -65,7 +38,7 @@ When(
   'I send a POST request to create a category as user with name {string} and parentId null',
   (name) => {
     cy.wrap(name).as('apiCategoryName');
-    cy.get('@userAuthToken').then((token) => {
+    cy.get('@authToken').then((token) => {
       cy.request({
         method: 'POST',
         url: '/api/categories',
@@ -90,7 +63,7 @@ When(
   'I send a PUT request to update category with id {int} and name {string}',
   (categoryId, name) => {
     cy.wrap(name).as('apiCategoryName');
-    cy.get('@userAuthToken').then((token) => {
+    cy.get('@authToken').then((token) => {
       cy.request({
         method: 'PUT',
         url: `/api/categories/${categoryId}`,
@@ -112,7 +85,7 @@ When(
 
 // DELETE /api/categories/{id} as user (should fail with 403)
 When('I send a DELETE request to delete category with id {int}', (categoryId) => {
-  cy.get('@userAuthToken').then((token) => {
+  cy.get('@authToken').then((token) => {
     cy.request({
       method: 'DELETE',
       url: `/api/categories/${categoryId}`,

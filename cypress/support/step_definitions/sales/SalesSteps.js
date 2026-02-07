@@ -47,14 +47,6 @@ Given('I navigate to sales page', () => {
   cy.wait(1000);
 });
 
-Given('I am logged in as user', () => {
-  cy.visit('/ui/login');
-  cy.get('input[name="username"]').type(Cypress.env('userUsername') || 'testuser');
-  cy.get('input[name="password"]').type(Cypress.env('userPassword') || 'test123');
-  cy.get('button[type="submit"]').click();
-  cy.url().should('include', '/dashboard', { timeout: 15000 });
-});
-
 Given('there are more than 10 sales records', () => {
   cy.get('body').then(($body) => {
     const hasPagination = $body.find('.pagination').length > 0;

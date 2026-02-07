@@ -1,14 +1,22 @@
 import { After } from '@badeball/cypress-cucumber-preprocessor';
 
+/** Only run cleanup for scenarios from Categories.feature (not CategoriesView.feature). */
+function isCategoriesFeature(scenario) {
+  const uri = scenario?.pickle?.uri ?? scenario?.uri ?? '';
+  if (typeof uri === 'string' && uri.includes('CategoriesView')) return false;
+  if (typeof uri === 'string' && uri.includes('Categories.feature')) return true;
+  const name = scenario?.pickle?.name ?? '';
+  return !name.includes('Verify Categories page') && !name.includes('Search categories by');
+}
+
 /**
  * After hook for UI scenario "Add main category with valid data" (@TC_UI_CAT_ADMIN_01).
  * The UI flow only knows the category name (@newCategoryName), not the id. We log in via API,
  * list categories, find the one matching @newCategoryName, then DELETE by id.
- *
- * Assumes: GET /api/categories returns a list (array or { content: [] } for pageable APIs).
- * If your API uses a different path or pagination, update listUrl or add a search param.
+ * Runs only for Categories.feature; CategoriesView.feature uses the same tag but does not set @newCategoryName.
  */
-After({ tags: '@TC_UI_CAT_ADMIN_01' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_01' }, function (scenario) {
+  if (!isCategoriesFeature(scenario)) return;
   cy.get('@newCategoryName').then((name) => {
     // Get admin token (UI scenario doesn't set @authToken)
     cy.request({
@@ -51,7 +59,8 @@ After({ tags: '@TC_UI_CAT_ADMIN_01' }, function () {
  * After hook for UI scenario "Add sub-category with valid data" (@TC_UI_CAT_ADMIN_02).
  * Cleans up the created sub-category and parent category (if created by test).
  */
-After({ tags: '@TC_UI_CAT_ADMIN_02' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_02' }, function (scenario) {
+  if (!isCategoriesFeature(scenario)) return;
   cy.get('@newCategoryName').then((subCategoryName) => {
     // Get admin token
     cy.request({
@@ -111,9 +120,10 @@ After({ tags: '@TC_UI_CAT_ADMIN_02' }, function () {
 
 /**
  * After hook for boundary tests (@TC_UI_CAT_ADMIN_03, @TC_UI_CAT_ADMIN_04).
- * Cleans up the created category.
+ * Cleans up the created category. Runs only for Categories.feature.
  */
-After({ tags: '@TC_UI_CAT_ADMIN_03 or @TC_UI_CAT_ADMIN_04' }, function () {
+After({ tags: '@TC_UI_CAT_ADMIN_03 or @TC_UI_CAT_ADMIN_04' }, function (scenario) {
+  if (!isCategoriesFeature(scenario)) return;
   cy.get('@newCategoryName').then((name) => {
     // Get admin token
     cy.request({
