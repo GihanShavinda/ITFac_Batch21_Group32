@@ -5,5 +5,15 @@
       "price": 10,
       "quantity": 5
     }
+  },
+  "categories": {
+    "mainCategory": {
+      "name": "Flowers",
+      "parent": null
+    },
+    "subCategory": {
+      "name": "Roses",
+      "parentId": 1
+    }
   }
 }
