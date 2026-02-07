@@ -1,3 +1,4 @@
+// cypress/support/e2e.js
 // Import commands
 import './commands';
 import '@shelex/cypress-allure-plugin';

@@ -3,6 +3,18 @@
     "admin": {
       "username": "admin",
       "password": "admin123"
+    },
+    "user": {
+      "username": "testuser",
+      "password": "test123"
+    }
+  },
+  "sales": {
+    "testQuantity": 2,
+    "messages": {
+      "success": "Plant sold successfully",
+      "deleteSuccess": "Sale deleted successfully",
+      "noSales": "No sales found"
     }
   }
 }
