@@ -6,8 +6,8 @@ Cypress E2E test automation for a plant nursery management system with role-base
 ## Architecture & Organization
 
 ### BDD Structure (Cucumber + Cypress)
-- **Feature files**: `cypress/e2e/features/**/*.feature` - Gherkin scenarios with tags
-- **Step definitions**: `cypress/support/step_definitions/` - organized by feature
+- **Feature files**: `cypress/e2e/features/**/*.feature` - API under `features/api/`, UI under `features/ui/`
+- **Step definitions**: `cypress/support/step_definitions/` - API under `api/`, UI under `ui/`
 - **Page Objects**: `cypress/pages/` - element locators + actions + assertions combined
 
 ### Test Separation Pattern
@@ -35,7 +35,7 @@ export default new Page(); // Singleton export
 Two login approaches exist side-by-side:
 1. **UI Login**: `cy.loginAsAdmin()` / `cy.loginAsUser()` (custom commands)
 2. **API Token**: `cy.getAdminToken()` for API tests
-3. **Inline login** in step definitions (e.g., [LoginSteps.js](cypress/support/step_definitions/LoginSteps.js) lines 23-28)
+3. **Inline login** in step definitions (e.g., [LoginSteps.js](cypress/support/step_definitions/ui/auth/LoginSteps.js) lines 23-28)
 
 **Important**: Use custom commands from [commands.js](cypress/support/commands.js) for new tests, but existing step definitions have inline implementations.
 
@@ -46,7 +46,7 @@ let authToken;
 let apiResponse;
 let categoryId;
 ```
-See [categoriesAPISteps.js](cypress/support/step_definitions/categories/categoriesAPISteps.js) - responses stored in `apiResponse` for assertion chaining.
+See [CategoriesAPISteps.js](cypress/support/step_definitions/api/categories/CategoriesAPISteps.js) - responses stored in `apiResponse` for assertion chaining.
 
 ### Environment Configuration
 Credentials in `cypress.config.js` env block (lines 26-31):
@@ -71,7 +71,7 @@ Example: `@admin @api @negative` for admin API error scenarios.
 npx cypress open
 
 # Specific feature
-npx cypress run --spec "cypress/e2e/features/categories/admin-categories-ui.feature"
+npx cypress run --spec "cypress/e2e/features/ui/categories/admin-categories-ui.feature"
 
 # By tags (requires plugin configuration)
 npx cypress run --env tags="@admin and @api"
@@ -79,7 +79,7 @@ npx cypress run --env tags="@admin and @api"
 
 ### Adding New Tests
 1. Create feature file with role prefix: `{role}-{feature}-{type}.feature`
-2. Add step definitions in `step_definitions/{feature}/` matching feature organization
+2. Add step definitions in `step_definitions/api/{feature}/` or `step_definitions/ui/{feature}/` matching feature organization
 3. Create/extend page object in `pages/{feature}/`
 4. Use existing custom commands from [commands.js](cypress/support/commands.js)
 5. Follow test ID pattern: `TST-{FEATURE}-{NUMBER}` in scenario names

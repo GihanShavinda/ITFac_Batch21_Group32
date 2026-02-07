@@ -10,8 +10,8 @@
  */
 
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
-import CategoriesViewPage from "../../../pages/categoriesView/CategoriesViewPage";
-import LoginPage from "../../../pages/LoginPage";
+import CategoriesViewPage from "../../../../pages/categoriesView/CategoriesViewPage";
+import LoginPage from "../../../../pages/LoginPage";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // BACKGROUND STEPS - Login and Navigation

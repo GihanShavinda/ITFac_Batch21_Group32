@@ -1,6 +1,6 @@
 // cypress/support/step_definitions/sales/SalesSteps.js
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
-import SalesPage from '../../../pages/sales/SalesPage';
+import SalesPage from '../../../../pages/sales/SalesPage';
 
 // Helper to clean database
 const cleanDatabase = (token, attempt = 1) => {

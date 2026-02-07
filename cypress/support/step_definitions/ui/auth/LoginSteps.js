@@ -1,6 +1,6 @@
-// cypress/support/step_definitions/LoginSteps.js
+// cypress/support/step_definitions/ui/auth/LoginSteps.js
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
-import LoginPage from '../../pages/LoginPage';
+import LoginPage from '../../../../pages/LoginPage';
 
 Given('I navigate to the login page', () => {
   LoginPage.visit();

@@ -1,5 +1,5 @@
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
-import PlantsPage from '../../../pages/plants/PlantsPage';
+import PlantsPage from '../../../../pages/plants/PlantsPage';
 
 Given('I navigate to plants page', () => {
   PlantsPage.visit();

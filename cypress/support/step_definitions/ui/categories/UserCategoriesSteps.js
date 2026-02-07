@@ -1,5 +1,5 @@
 import { When, Then } from '@badeball/cypress-cucumber-preprocessor';
-import CategoriesPage from '../../../pages/categories/CategoriesPage';
+import CategoriesPage from '../../../../pages/categories/CategoriesPage';
 
 // Step for attempting direct navigation
 When('I attempt to navigate to {string}', (url) => {

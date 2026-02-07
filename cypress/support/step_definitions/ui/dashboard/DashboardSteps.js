@@ -1,5 +1,5 @@
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
-import DashboardPage from "../../../pages/dashboard/DashboardPage";
+import DashboardPage from "../../../../pages/dashboard/DashboardPage";
 
 Then("I should be automatically redirected to the dashboard", () => {
   // Wait for redirect with timeout

@@ -1,4 +1,4 @@
-# cypress/e2e/features/auth/Login.feature
+# cypress/e2e/features/ui/auth/Login.feature
 Feature: Login Functionality
   As a user
   I want to login to the application

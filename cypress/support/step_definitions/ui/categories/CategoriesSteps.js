@@ -1,5 +1,5 @@
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
-import CategoriesPage from '../../../pages/categories/CategoriesPage';
+import CategoriesPage from '../../../../pages/categories/CategoriesPage';
 
 Given('I navigate to categories page', () => {
   // Wait a bit after login to ensure session is established

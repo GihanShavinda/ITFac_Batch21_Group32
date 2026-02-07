@@ -1,4 +1,4 @@
-# cypress/e2e/features/sales/Sales.feature
+# cypress/e2e/features/ui/sales/Sales.feature
 Feature: Sales Management UI
 
   Background:
