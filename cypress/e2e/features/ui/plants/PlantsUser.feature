@@ -20,6 +20,15 @@ Feature: Plants – User
     When I search for plant name "Rose"
     Then only plants matching "Rose" should be displayed
 
+  # BUG-001: Search returns no results when the search term contains a space (e.g. "Updated Rose").
+  # Expected: Only plants matching the search term (including spaces) should be displayed.
+  @TC_UI_PLT_USER_02 @BUG-001
+  Scenario: Search plant by name with space in term
+    Given I am logged in as user
+    And I navigate to plants page
+    When I search for plant name "Updated Rose"
+    Then only plants matching "Updated Rose" should be displayed
+
   # Partial search: "Gerbera O" should show plants whose name contains that substring (e.g. "Gerbera Orange"). Fails if app does exact-match only or breaks on partial terms.
   @TC_UI_PLT_USER_02 @partial-search
   Scenario: Partial search by name shows matching plants

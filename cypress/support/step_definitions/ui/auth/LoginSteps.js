@@ -1,5 +1,5 @@
 import { Given, When, Then } from '@badeball/cypress-cucumber-preprocessor';
-import LoginPage from '../../pages/LoginPage';
+import LoginPage from '../../../../pages/LoginPage';
 
 Given('I navigate to the login page', () => {
   LoginPage.visit();
@@ -26,18 +26,27 @@ Given('I am logged in as admin', () => {
   LoginPage.enterUsername(Cypress.env('adminUsername') || 'admin');
   LoginPage.enterPassword(Cypress.env('adminPassword') || 'admin123');
   LoginPage.clickLogin();
+  cy.url().should('not.include', '/login', { timeout: 10000 });
+});
+
+Given('I am logged in as user', () => {
+  LoginPage.visit();
+  LoginPage.enterUsername(Cypress.env('userUsername') || 'user');
+  LoginPage.enterPassword(Cypress.env('userPassword') || 'user123');
+  LoginPage.clickLogin();
+  cy.url().should('not.include', '/login', { timeout: 10000 });
+});
+
+Given('I am logged in as test user', () => {
+  LoginPage.visit();
+  LoginPage.enterUsername(Cypress.env('userUsername') || 'testuser');
+  LoginPage.enterPassword(Cypress.env('userPassword') || 'test123');
+  LoginPage.clickLogin();
 });
 
 Given('I am logged in as sales manager', () => {
   LoginPage.visit();
   LoginPage.enterUsername('salesmanager@test.com');
   LoginPage.enterPassword('password123');
-  LoginPage.clickLogin();
-});
-
-Given('I am logged in as user', () => {
-  LoginPage.visit();
-  LoginPage.enterUsername(Cypress.env('userUsername') || 'testuser');
-  LoginPage.enterPassword(Cypress.env('userPassword') || 'test123');
   LoginPage.clickLogin();
 });

@@ -21,11 +21,11 @@ Feature: Plants API
     When I send a PUT request to update the plant with name "Updated Rose" price 15 quantity 8
     Then the response status should be 200
     And the response body should contain plant details
-    And the response body should contain name "Updated Rose" price 15 quantity 8
+    And the response body should contain the updated plant name and price 15 quantity 8
 
   # TC_API_PLT_ADMIN_03: Delete plant API
   # Preconditions: Admin authenticated; a plant exists with known ID.
-  # Expected: 204 No Content (or 200 OK); GET /api/plants/{id} then returns 404.
+  # Expected: 204 No Content (REST-typical); spec may say 200 OK—align with actual API. GET /api/plants/{id} then returns 404.
   @api @TC_API_PLT_ADMIN_03
   Scenario: Delete plant via API as admin
     Given I am authenticated as admin for API
@@ -44,16 +44,23 @@ Feature: Plants API
     Then the response status should be 400
     And the response body should contain the error message "Price must be greater than 0"
 
-  # TC_API_PLT_ADMIN_05: Quantity boundary (0 allowed, -1 rejected)
+  # TC_API_PLT_ADMIN_05: Quantity boundary - quantity 0 allowed
   # Preconditions: Admin authenticated.
-  # Expected: quantity 0 -> 201; quantity -1 -> 400 with error.
-  @api @TC_API_PLT_ADMIN_05
-  Scenario: API allows quantity 0 and rejects negative quantity
+  # Expected: 201 Created with plant details.
+  @api @TC_API_PLT_ADMIN_05 @TC_API_PLT_ADMIN_05_cleanup
+  Scenario: API allows plant creation with quantity 0
     Given I am authenticated as admin for API
     When I send a POST request to create a plant with name "Boundary" price 10 quantity 0 in category 1
     Then the response status should be 201
     And the response body should contain plant details
     And I store the created plant id for cleanup
+
+  # TC_API_PLT_ADMIN_05: Quantity boundary - negative quantity rejected
+  # Preconditions: Admin authenticated.
+  # Expected: 400 Bad Request with "Quantity cannot be negative".
+  @api @TC_API_PLT_ADMIN_05
+  Scenario: API returns 400 when creating plant with negative quantity
+    Given I am authenticated as admin for API
     When I send a POST request to create a plant with name "InvalidQty" price 10 quantity -1 in category 1
     Then the response status should be 400
     And the response body should contain the error message "Quantity cannot be negative"

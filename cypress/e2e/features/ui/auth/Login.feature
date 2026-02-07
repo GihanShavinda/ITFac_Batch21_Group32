@@ -1,3 +1,4 @@
+# cypress/e2e/features/ui/auth/Login.feature
 Feature: Login Functionality
   As a user
   I want to login to the application
@@ -11,3 +12,4 @@ Feature: Login Functionality
     And I enter password "admin123"
     And I click on login button
     Then I should be redirected to the dashboard
+ 

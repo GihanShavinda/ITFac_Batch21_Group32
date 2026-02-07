@@ -1,26 +1,19 @@
 class PlantsPage {
   elements = {
-    // Find by link text (href can vary with base path)
     addPlantButton: () => cy.contains('a', 'Add a Plant'),
     nameInput: () => cy.get('#name, input[name="name"]').first(),
-    // Your app uses id="categoryId" name="categoryId" (options: value="" placeholder, "1" Lilly, "3" Rosa)
     categorySelect: () => cy.get('#categoryId, select[name="categoryId"]').first(),
     priceInput: () => cy.get('#price, input[name="price"]').first(),
     quantityInput: () => cy.get('#quantity, input[name="quantity"]').first(),
     saveButton: () => cy.contains('button', 'Save').first(),
-    // List page: Edit is <a href="/ui/plants/edit/{id}" title="Edit"> with icon only; Delete is <form action="/ui/plants/delete/{id}"><button title="Delete"> with icon (modal's "Delete" is hidden until opened)
     firstEditLink: () => cy.get('a[href*="/ui/plants/edit/"]').first(),
     firstDeleteButton: () => cy.get('table tbody tr').first().find('form[action*="/ui/plants/delete/"] button').first(),
-    // Validation: message below Price field or in form (adjust selector if your app uses specific class e.g. .invalid-feedback)
     validationMessage: (text) => cy.contains(text).filter(':visible'),
-    // Table row containing plant name (for Low badge); then find badge within row
     rowContainingPlantName: (name) => cy.contains('tr', name).first(),
-    // List page: search, filter, sort (adjust selectors to match your app)
     searchInput: () => cy.get('input[name="search"], input[name="name"], input[placeholder*="Search"], input[type="search"]').first(),
     searchButton: () => cy.get('button[type="submit"]').filter(':visible').first(),
     categoryFilterSelect: () => cy.get('select[name="categoryId"], select[name="category"], #categoryFilter').first(),
     sortSelect: () => cy.get('select[name="sort"], select[name="orderBy"], #sortBy').first(),
-    // Column headers for sort (if sort is by clicking headers)
     sortHeader: (label) => cy.contains('th', label).first(),
   };
 
@@ -40,7 +33,6 @@ class PlantsPage {
     if (name) this.elements.nameInput().clear().type(name);
     if (categoryOption !== undefined) {
       if (categoryOption === 'first' || categoryOption === '') {
-        // Select first real option (index 1 skips "Select..." placeholder if present)
         this.elements.categorySelect().select(1, { force: true });
       } else {
         this.elements.categorySelect().select(categoryOption);
@@ -83,28 +75,22 @@ class PlantsPage {
     this.elements.firstDeleteButton().click();
   }
 
-  /** Get the name of the first plant in the list (first cell or first text in first row). */
   getFirstPlantName() {
-    // Assume table: first data row has plant name in first column or first link/text
     return cy.get('table tbody tr').first().find('td').first().invoke('text').then((t) => t.trim());
   }
 
   shouldNotContainPlantNamed(plantName) {
-    // After delete we stay on list; scoped to table to avoid matching nav/header
     cy.get('table').within(() => {
       cy.contains(plantName).should('not.exist');
     });
   }
 
-  /** Assert "Low" badge is visible in the same row as the plant with the given name. */
   shouldSeeLowBadgeForPlant(plantName) {
     this.elements.rowContainingPlantName(plantName).within(() => {
       cy.contains(/Low/i).should('be.visible');
     });
   }
 
-  // --- List page: search, filter, sort (user scenarios) ---
-  /** Select "All" in category filter so search by name returns all matching plants (not only no-category). */
   ensureCategoryFilterIsAll() {
     cy.get('body').then(($body) => {
       const $sel = $body.find('select[name="categoryId"], select[name="category"], #categoryFilter');
@@ -139,7 +125,6 @@ class PlantsPage {
       if ($sortSelect.length) {
         cy.get('select[name="sort"], select[name="orderBy"], #sortBy').first().select(new RegExp(normalized, 'i'), { force: true });
       } else {
-        // Sort is done by clicking the <a> link in the header (e.g. <a href="...?sortField=quantity&sortDir=desc">Stock</a>)
         cy.get('table').contains('a', new RegExp(field, 'i')).first().click();
         cy.url().should('include', 'sortField=');
       }
@@ -156,7 +141,6 @@ class PlantsPage {
     });
   }
 
-  /** Asserts: at least one row is displayed, and every row's text contains the search term (substring match). */
   shouldSeeOnlyPlantsMatchingSearch(searchTerm) {
     cy.get('table tbody tr').should('have.length.greaterThan', 0);
     cy.get('table tbody tr').each(($row) => {
@@ -170,7 +154,6 @@ class PlantsPage {
 
   shouldBeSortedBy(field) {
     const fieldLower = String(field).toLowerCase();
-    // Resolve column index from table header (Name, Price, Stock/Quantity may be in any order)
     cy.get('table thead th').then(($headers) => {
       let colIndex = -1;
       $headers.each((i, el) => {
@@ -188,7 +171,6 @@ class PlantsPage {
           const cell = Cypress.$(row).find('td').eq(colIndex).text().trim();
           values.push(cell);
         });
-        // Assert list is in sorted order (ascending or descending); don't compare to our own sort so direction and tie-breaking don't fail
         const isNumeric = fieldLower !== 'name';
         const cmp = (a, b) => {
           if (isNumeric) {
